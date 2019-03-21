@@ -6,7 +6,7 @@ a-blog cms のための「Google Translation API」連携拡張アプリにな�
 ## 動作条件
 
 * php5.5 以上
-* a-blog cms for Professional or Enterprise のみ（現状スタンダードライセンスでの利用はできません）
+* a-blog cms for Professional or Enterprise のみ（現状スタンダードライセンスでの利用はライセンス違反となります）
 * a-blog cms Ver. 2.10.0 以上
 
 ## ダウンロード
