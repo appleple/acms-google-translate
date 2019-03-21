@@ -1,0 +1,82 @@
+<!-- BEGIN_MODULE Admin_Errors -->
+<p class="acms-admin-alert acms-admin-alert-danger acms-admin-alert-icon">
+	<span class="acms-admin-alert-icon-before acms-admin-icon-news"></span>
+	\{error\}
+	<button class="js-acms-alert-close acms-admin-alert-icon-after acms-admin-margin-right-mini">×</button>
+</p>
+<!-- END_MODULE Admin_Errors -->
+
+<!-- BEGIN_MODULE GoogleTranslate_EntryList -->
+<section class="acms-container">
+	<div class="acms-admin-edit-info">
+		<h3 class="acms-admin-edit-info-heading">多言語設定</h3>
+		<table class="acms-admin-table acms-edit-info-table">
+			<thead>
+			<tr>
+				<th width="120">言語</th>
+				<th width="120">ステータス</th>
+				<th>カテゴリー</th>
+				<th>タイトル</th>
+				<th width="100">編集</th>
+			</tr>
+			</thead>
+			<tbody><!-- BEGIN\ lang:loop -->
+			<tr>
+				<th class="acms-admin-text-nowrap">
+					\{label\}
+					<!-- BEGIN_IF [\{relation_eid\}/eq/%{EID}] -->
+					<span class="acms-admin-label acms-admin-label-success admin-status-label">表示中</span>
+					<!-- END_IF -->
+				</th>
+				<td>
+					<!-- BEGIN_IF [\{entry_status\}/eq/close]--><span class="acms-admin-label acms-admin-label-danger admin-status-label"><!--T-->非公開<!--/T--></span>
+					<!-- ELSE_IF [\{entry_status\}/eq/open] --><span class="acms-admin-label acms-admin-label-info admin-status-label"><!--T-->公開<!--/T--></span>
+					<!-- ELSE_IF [\{entry_status\}/eq/draft] --><span class="acms-admin-label acms-admin-label-warning admin-status-label"><!--T-->下書き<!--/T--></span>
+					<!-- ELSE_IF [\{entry_status\}/eq/trash] --><span class="acms-admin-label acms-admin-label-danger admin-status-label"><!--T-->ゴミ箱<!--/T--></span>
+					<!-- ELSE --><span class="acms-admin-label acms-admin-label admin-status-label"><!--T-->未作成<!--/T--></span><!-- END_IF -->
+
+					<span class="acms-admin-label acms-admin-label-\{status_code\}">\{status\}</span>
+				</td>
+				<td>
+					<a href="\{category_editUrl\}" target="_blank">\{category_label\}</a>
+				</td>
+				<!-- BEGIN_IF [\{title\}/nem] -->
+				<td><a href="\{url\}" target="_blank">\{title\} - \{code\}</a></td>
+				<td>
+					<a href="\{edit_url\}" class="acms-admin-btn">編集</a>
+					<!-- BEGIN_IF [\{ja_bid\}/eq/%{BID}] -->
+					<!-- BEGIN_IF [\{ja_bid\}/neq/\{relation_bid\}] -->
+					<form action="" method="post" class="acms-admin-form acms-admin-inline">
+						<input type="submit" name="ACMS_POST_Entry_Delete" class="acms-admin-btn acms-admin-btn-danger" value="削除" onclick="javascript:return confirm('エントリーを削除します。よろしいですか？')" />
+						<input type="hidden" name="eid" value="\{relation_eid\}" />
+						<input type="hidden" name="redirect" value="%{CURRENT_URL}" />
+					</form>
+					<!-- END_IF -->
+					<!-- END_IF -->
+				</td>
+				<!-- ELSE -->
+				<td>
+					<!-- BEGIN_IF [\{ja_bid\}/eq/%{BID}] -->
+					<form method="post" class="acms-admin-inline">
+						<input type="hidden" name="target_bid" value="\{relation_bid\}">
+						<input type="hidden" name="original_eid" value="%{EID}">
+						<input type="submit" name="ACMS_POST_GoogleTranslate_CreateEntry" value="コピーのみ作成" class="acms-admin-btn acms-admin-btn-success">
+					</form>
+					<form method="post" class="acms-admin-inline">
+						<input type="hidden" name="target_bid" value="\{relation_bid\}">
+						<input type="hidden" name="original_eid" value="%{EID}">
+						<input type="hidden" name="do_google_translate" value="1">
+						<input type="submit" name="ACMS_POST_GoogleTranslate_CreateEntry" value="翻訳して作成" class="acms-admin-btn acms-admin-btn-success">
+					</form>
+					<!-- ELSE -->
+					他言語のエントリーを作成するには、日本語（オリジナル）から作成できます。
+					<!-- END_IF -->
+				</td>
+				<td></td>
+				<!-- END_IF -->
+			</tr><!-- END\ lang:loop -->
+			</tbody>
+		</table>
+	</div>
+</section>
+<!-- END_MODULE GoogleTranslate_EntryList -->

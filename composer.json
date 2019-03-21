@@ -1,0 +1,16 @@
+{
+  "name": "ablogcms/spoke",
+  "description": "Spoke連携プラグイン",
+  "require": {
+    "php": ">=5.5.0",
+    "slim/slim": "^3.0",
+    "webmozart/json": "^1.2",
+    "google/cloud": "^0.96.0"
+  },
+  "config": {
+    "vendor-dir": "vendor",
+    "platform": {
+      "php": "5.5.0"
+    }
+  }
+}

@@ -1,0 +1,329 @@
+{
+    "entries": [
+        {% for entry in json.body %}
+        {
+            "method": "{% if entry.method == "insert" %}insupd{% else %}{{ entry.method  }}{% endif %}",
+            "title": "{{ entry.title.view|raw }}",
+            "code": "{{ entry.itemCode }}.html",
+            "status": "{% if entry.availFlg and entry.pubFlg %}open{% else %}close{% endif %}",
+            "link": "",
+            "datetime": "{{ entry.sailDate|date("Y-m-d H:i:s") }}",
+            "start_datetime": "{% if entry.infoRelDate is empty %}1000-01-01 00:00:00{% else %}{{ entry.infoRelDate|date("Y-m-d H:i:s") }}{% endif %}",
+            "end_datetime": "9999-12-31 23:59:59",
+            "posted_datetime": "{{ entry.regDate|date("Y-m-d H:i:s") }}",
+            "updated_datetime": "{{ entry.updDate|date("Y-m-d H:i:s") }}",
+            "indexing": "on",
+            "fields": [
+                {
+                    "key": "entry_title",
+                    "value": "{{ entry.title.view|raw }}",
+                    "search": "on"
+                },
+                {
+                    "key": "title_kana",
+                    "value": "{{ entry.title.mainKana|raw }}",
+                    "search": "on"
+                },
+                {
+                    "key": "search_word",
+                    "value": "{% for auth in entry.auth %}{{- auth.name|replace({' ':'', '　':''}) -}}{{- auth.nameKana -}}{% endfor %}{{- entry.brand.name -}}{{ entry.desc.srchKeyWord }}",
+                    "search": "on"
+                },
+                {
+                    "key": "genre",
+                    "value": "{{ entry.genreOhp.l.name|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "genre_m",
+                    "value": "{{ entry.genreOhp.m.name|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "bookCover_url",
+                    "value": "{{ entry.bookCover.l|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "bookCover_url_m",
+                    "value": "{{ entry.bookCover.m|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "bookCover_url_s",
+                    "value": "{{ entry.bookCover.s|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "bookCover_url_ss",
+                    "value": "{{ entry.bookCover.ss|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "isbn",
+                    "value": "{{ entry.bookInfo.isbn|raw }}",
+                    "search": "on"
+                },
+                {
+                    "key": "pageNum",
+                    "value": "{{ entry.bookInfo.pageNum|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "book_format",
+                    "value": "{{ entry.bookInfo.fmt|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "description_catchCopy",
+                    "value": "{{ entry.desc.catchCopy|raw }}",
+                    "search": "on"
+                },
+                {
+                    "key": "series_name",
+                    "value": "{{ entry.seriesOhp.lv1.name|raw }}",
+                    "search": "on"
+                },
+                {
+                    "key": "series_seriesNum",
+                    "value": "{{ entry.series.no }}",
+                    "search": "off"
+                },
+                {
+                    "key": "price_fix",
+                    "value": "{{ entry.price.priceFix }}",
+                    "search": "off"
+                },
+                {
+                    "key": "price_srp",
+                    "value": "{{ entry.price.priceRtl }}",
+                    "search": "off"
+                },
+                {
+                    "key": "description_script100",
+                    "value": "{% if entry.desc.contIntro is empty %}{{ entry.desc.script100|raw }}{% else %}{{entry.desc.contIntro|raw }}{% endif %}",
+                    "search": "on"
+                },
+                {
+                    "key": "bookInfo_award",
+                    "value": "{{ entry.bookInfo.award|raw }}",
+                    "search": "on"
+                },
+                {
+                    "key": "bookInfo_memo",
+                    "value": "{{ entry.bookInfo.memo|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "desc_toc",
+                    "value": "{{ entry.desc.toc|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "kadokawaStore",
+                    "value": "{{ entry.purch.kadokawaStore|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "rakuten",
+                    "value": "{{ entry.purch.rakuten|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "amazon",
+                    "value": "{{ entry.purch.amazon|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "animate",
+                    "value": "{{ entry.purch.animate|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "bw_url",
+                    "value": "{{ entry.purch.bw.url|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "bw_expDate",
+                    "value": "{{ entry.purch.bw.expDate }}",
+                    "search": "off"
+                },
+                {
+                    "key": "bw_licDate",
+                    "value": "{{ entry.purch.bw.licDate }}",
+                    "search": "off"
+                },
+                {
+                    "key": "bw_toDate",
+                    "value": "{{ entry.purch.bw.toDate }}",
+                    "search": "off"
+                },
+                {
+                    "key": "purchase_7net",
+                    "value": "{{ entry.purch["7net"]|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "purchase_eHon",
+                    "value": "{{ entry.purch.eHon|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "purchase_honto",
+                    "value": "{{ entry.purch.honto|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "purchase_honyaClub",
+                    "value": "{{ entry.purch.honyaClub|raw }}",
+                    "search": "off"
+                },
+                {
+                    "key": "purchase_kinokuniya",
+                    "value": "{{ entry.purch.kinokuniya|raw }}",
+                    "search": "off"
+                }
+            ],
+            "fieldGroups": [
+                {
+                    "group": "authors",
+                    "items": [
+                        {% for auth in entry.auth %}
+                        {
+                            "fields": [
+                                {
+                                    "key": "author_title",
+                                    "value": "{{ auth.title|raw }}",
+                                    "search": "off"
+                                },
+                                {
+                                    "key": "author_name",
+                                    "value": "{{ auth.name|raw }}",
+                                    "search": "on"
+                                },
+                                {
+                                    "key": "author_furigana",
+                                    "value": "{{ auth.nameKana|raw }}",
+                                    "search": "on"
+                                }
+                            ]
+                        }
+                        {% if not loop.last %},
+                        {% endif %}{% endfor %}
+                    ]
+                },
+                {
+                    "group": "characters",
+                    "items": [
+                        {% for char in entry.charInfo.char %}
+                        {
+                            "fields": [
+                                {
+                                    "key": "char_cont",
+                                    "value": "{{ char.cont|raw }}",
+                                    "search": "on"
+                                },
+                                {
+                                    "key": "char_imgUrl",
+                                    "value": "{{ char.imgUrl|raw }}",
+                                    "search": "off"
+                                },
+                                {
+                                    "key": "char_name",
+                                    "value": "{{ char.name|raw }}",
+                                    "search": "on"
+                                }
+                            ]
+                        }
+                        {% if not loop.last %},
+                        {% endif %}{% endfor %}
+                    ]
+                },
+                {
+                    "group": "book_comments",
+                    "items": [
+                        {% for comment in entry.cmnt %}
+                        {
+                            "fields": [
+                                {
+                                    "key": "comment_cont",
+                                    "value": "{{ comment.cont|raw }}",
+                                    "search": "on"
+                                }
+                            ]
+                        }
+                        {% if not loop.last %},
+                        {% endif %}{% endfor %}
+                    ]
+                },
+                {
+                    "group": "movies",
+                    "items": [
+                        {% for video in entry.movie %}
+                        {
+                            "fields": [
+                                {
+                                    "key": "video_movUrl",
+                                    "value": "{{ video.movUrl|raw }}",
+                                    "search": "off"
+                                },
+                                {
+                                    "key": "video_title",
+                                    "value": "{{ video.title|raw }}",
+                                    "search": "off"
+                                },
+                                {
+                                    "key": "video_fromDate",
+                                    "value": "{{ video.fromDate|raw }}",
+                                    "search": "off"
+                                },
+                                {
+                                    "key": "video_toDate",
+                                    "value": "{{ video.toDate|raw }}",
+                                    "search": "off"
+                                }
+                            ]
+                        }
+                        {% if not loop.last %},
+                        {% endif %}{% endfor %}
+                    ]
+                },
+                {
+                    "group": "book_banners",
+                    "items": [
+                        {% for banner in entry.banner %}
+                        {
+                            "fields": [
+                                {
+                                    "key": "banner_imgUrl",
+                                    "value": "{{ banner.imgUrl|raw }}",
+                                    "search": "off"
+                                },
+                                {
+                                    "key": "banner_linkUrl",
+                                    "value": "{{ banner.linkUrl|raw }}",
+                                    "search": "off"
+                                },
+                                {
+                                    "key": "banner_fromDate",
+                                    "value": "{{ banner.fromDate|raw }}",
+                                    "search": "off"
+                                },
+                                {
+                                    "key": "banner_toDate",
+                                    "value": "{{ banner.toDate|raw }}",
+                                    "search": "off"
+                                }
+                            ]
+                        }
+                        {% if not loop.last %},
+                        {% endif %}{% endfor %}
+                    ]
+                }
+            ]
+        }
+        {% if not loop.last %},
+        {% endif %}{% endfor %}
+    ]
+}

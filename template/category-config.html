@@ -1,0 +1,26 @@
+<!-- BEGIN_MODULE Category_Field -->
+<!-- BEGIN_MODULE GoogleTranslate_CategoryList -->
+<h2 class="acms-admin-admin-title2">このカテゴリー（日本語）と関連づける各言語のカテゴリーコードの例外を設定</h2>
+<table class="js-fieldgroup-sortable adminTable acms-admin-table-admin-edit">
+	<thead class="acms-admin-hide-sp">
+	<tr>
+		<th class="acms-admin-table-left">言語</th>
+		<th class="acms-admin-table-left">対応コード</th>
+	</tr>
+	</thead>
+	<tbody>
+	<!-- BEGIN\ lang:loop -->
+	<tr class="sortable-item">
+		<td>
+			\{lang_label\}
+		</td>
+		<td>
+			<input type="text" name="google_translate_relation_category_\{lang_code\}_code[]" value="\\{google_translate_relation_category_\{lang_code\}_code\\}" class="acms-admin-form-width-full"/>
+			<input type="hidden" name="field[]" value="google_translate_relation_category_\{lang_code\}_code"/>
+		</td>
+	</tr>
+	<!-- END\ lang:loop -->
+	</tbody>
+</table>
+<!-- END_MODULE GoogleTranslate_CategoryList -->
+<!-- END_MODULE Category_Field -->

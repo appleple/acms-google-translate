@@ -1,0 +1,59 @@
+---
+%{PREFIX}google_translate_blog:
+  base_blog_id:
+    Field: base_blog_id
+    Type: int(11)
+    'Null': NO
+    Key: PRI
+    Default:
+    Extra:
+  relation_bid:
+    Field: relation_bid
+    Type: int(11)
+    'Null': NO
+    Key: PRI
+    Default:
+    Extra:
+  lang_label:
+    Field: lang_label
+    Type: varchar(255)
+    'Null': NO
+    Key:
+    Default:
+    Extra:
+  lang_code:
+    Field: lang_code
+    Type: varchar(16)
+    'Null': NO
+    Key:
+    Default:
+    Extra:
+%{PREFIX}google_translate_entry:
+  base_entry_id:
+    Field: base_entry_id
+    Type: int(11)
+    'Null': NO
+    Key: PRI
+    Default:
+    Extra:
+  relation_eid:
+    Field: relation_eid
+    Type: int(11)
+    'Null': NO
+    Key: PRI
+    Default:
+    Extra:
+  relation_bid:
+    Field: relation_bid
+    Type: int(11)
+    'Null': NO
+    Key: PRI
+    Default:
+    Extra:
+  status:
+    Field: status
+    Type: varchar(16)
+    'Null': YES
+    Key:
+    Default:
+    Extra:

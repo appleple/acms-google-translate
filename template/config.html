@@ -1,0 +1,376 @@
+<header>
+	<div>
+		@include("/admin/topicpath.html")
+	</div>
+	<div>
+		<h1 class="acms-admin-admin-title js-dialog-title">
+			多言語設定
+		</h1>
+	</div>
+	<div class="acms-admin-col-md-6">
+
+	</div>
+</header>
+
+<!-- BEGIN_MODULE GoogleTranslate_Config -->
+
+<form action="" method="post" class="acms-admin-form">
+	<div class="js-acms_fix_marker acms_fix_bg">
+		<div class="acms_fix_bg_index">
+			<input type="submit" name="ACMS_POST_GoogleTranslate_Config" value="<!--T-->保存<!--/T-->"
+				   class="acms-admin-btn-admin acms-admin-btn-admin-primary acms-admin-btn-admin-save js-saving-splash"/>
+		</div>
+	</div>
+
+	<!-- BEGIN_MODULE Admin_Messages -->
+	<!-- BEGIN message:loop -->
+	<p class="acms-admin-alert acms-admin-alert-icon acms-admin-alert-info">
+		<span class="acms-admin-icon acms-admin-icon-news acms-admin-alert-icon-before" aria-hidden="true"></span>
+		<button class="js-acms-alert-close acms-admin-alert-icon-after">×</button>
+		{message}
+	</p>
+	<!-- END message:loop -->
+	<!-- END_MODULE Admin_Messages -->
+
+	<p class="acms-admin-alert acms-admin-alert-danger">
+		ここでの設定は、ベースとなる言語のブログでのみ設定を行います。
+	</p>
+
+	<!-- BEGIN_MODULE Admin_Config -->
+	<h2 class="acms-admin-admin-title2">基本設定</h2>
+	<table class="acms-admin-table-admin-edit">
+		<tr>
+			<th>ベース言語</th>
+			<td>
+				<select name="google_translate_base_lang" class="acms-admin-form-width-full">
+					<option value="ja" {google_translate_base_lang:selected#ja}>ja (日本語)</option>
+					<option value="en" {google_translate_base_lang:selected#en}>en (英語)</option>
+					<option value="zh-CN" {google_translate_base_lang:selected#zh-CN}>zh-CN（简体中文）</option>
+					<option value="zh-TW" {google_translate_base_lang:selected#zh-TW}>zh-TW（繁体中文）</option>
+					<option value="ko" {google_translate_base_lang:selected#ko}>ko（韓国語）</option>
+					<option value="es" {google_translate_base_lang:selected#es}>es（スペイン語）</option>
+					<option value="id" {google_translate_base_lang:selected#id}>id（インドネシア）</option>
+					<option value="th" {google_translate_base_lang:selected#th}>th（タイ語）</option>
+					<option value="fr" {google_translate_base_lang:selected#fr}>fr（フランス語）</option>
+				</select>
+				<input type="hidden" name="config[]" value="google_translate_base_lang" />
+			</td>
+		</tr>
+		<tr>
+			<th>Google Translate API Key</th>
+			<td>
+				<input type="text" name="google_translate_google_translate_api_key" value="{google_translate_google_translate_api_key}" class="acms-admin-form-width-full">
+				<input type="hidden" name="config[]" value="google_translate_google_translate_api_key" />
+			</td>
+		</tr>
+		<tr>
+			<th>カテゴリー作成</th>
+			<td>
+				エントリー複製時に存在しないカテゴリーがあった場合、自動でカテゴリーを<br>
+				<div class="acms-admin-form-radio">
+					<input type="radio" name="google_translate_create_category" value="create" {google_translate_create_category:checked#create} id="input-radio-google_translate_create_category-create" />
+					<label for="input-radio-google_translate_create_category-create">
+						<i class="acms-admin-ico-radio"></i>作成する</label>
+				</div>
+				<div class="acms-admin-form-radio">
+					<input type="radio" name="google_translate_create_category" value="none" {google_translate_create_category:checked#none} id="input-radio-google_translate_create_category-none" />
+					<label for="input-radio-google_translate_create_category-none">
+						<i class="acms-admin-ico-radio"></i>作成しない</label>
+				</div>
+				<input type="hidden" name="config[]" value="google_translate_create_category" />
+				<input type="hidden" name="google_translate_create_category:v#required" value="" id="google_translate_create_category-v-required" />
+				<!-- BEGIN google_translate_create_category:validator#required -->
+				<p class="acms-admin-text-error">必須入力です</p>
+				<!-- END google_translate_create_category:validator#required -->
+			</td>
+		</tr>
+	</table>
+	<!-- END_MODULE Admin_Config -->
+
+	<h2 class="acms-admin-admin-title2">ベース言語（このブログ）と関連づける他言語ブログを設定</h2>
+	<table class="js-fieldgroup-sortable adminTable acms-admin-table-admin-edit">
+		<thead class="acms-admin-hide-sp">
+		<tr>
+			<th class="acms-admin-table-left acms-admin-admin-config-table-item-handle"> </th>
+			<th class="acms-admin-table-left">ラベル</th>
+			<th class="acms-admin-table-left">言語コード</th>
+			<th class="acms-admin-table-left">ブログID</th>
+			<th class="acms-admin-table-left acms-admin-admin-config-table-action">削除</th>
+		</tr>
+		</thead>
+		<tbody>
+		<!-- BEGIN google_translate_blog:loop -->
+		<tr class="sortable-item">
+			<td class="item-handle">
+				<i class="acms-admin-icon-sort"></i>
+			</td>
+			<td>
+				<input type="text" name="google_translate_lang_label[]" value="{google_translate_lang_label}" class="acms-admin-form-width-full" />
+			</td>
+			<td>
+				<select name="google_translate_lang_code[]">
+					<option value="en"{google_translate_lang_code:selected#en}>en（英語）</option>
+					<option value="zh-CN"{google_translate_lang_code:selected#zh-CN}>zh-CN (简体中文)</option>
+					<option value="zh-TW"{google_translate_lang_code:selected#zh-TW}>zh-tw (繁体中文)</option>
+					<option value="ko"{google_translate_lang_code:selected#ko}>ko (韓国語)</option>
+					<option value="es"{google_translate_lang_code:selected#es}>es (スペイン語)</option>
+					<option value="id"{google_translate_lang_code:selected#id}>id (インドネシア語)</option>
+					<option value="th"{google_translate_lang_code:selected#th}>th (タイ語)</option>
+					<option value="fr"{google_translate_lang_code:selected#fr}>fr (フランス語)</option>
+					<option value="ja"{google_translate_lang_code:selected#ja}>ja (日本語)</option>
+				</select>
+			</td>
+			<td>
+				<!-- BEGIN_MODULE Admin_Blog_SelectGlobal -->
+				<select name="google_translate_relation_bid[]">
+					<option value="">ブログを選択してください</option><!-- BEGIN loop -->
+					<option value="{value}" \{google_translate_relation_bid:selected#{value}\}>{indent}[raw]{label}</option><!-- END loop -->
+				</select>
+				<!-- END_MODULE Admin_Blog_SelectGlobal -->
+			</td>
+			<td>
+				<input type="button" class="item-delete acms-admin-btn-admin acms-admin-btn-admin-danger" value="削除" />
+			</td>
+		</tr>
+		<!-- END google_translate_blog:loop -->
+		<tr class="sortable-item item-template">
+			<td class="item-handle">
+				<i class="acms-admin-icon-sort"></i>
+			</td>
+			<td>
+				<input type="text" name="google_translate_lang_label[]" value="" class="acms-admin-form-width-full" />
+			</td>
+			<td>
+				<select name="google_translate_lang_code[]">
+					<option value="en">en（英語）</option>
+					<option value="zh-CN">zh-CN (简体中文)</option>
+					<option value="zh-TW">zh-TW (繁体中文)</option>
+					<option value="ko">ko (韓国語)</option>
+					<option value="es">es (スペイン語)</option>
+					<option value="id">id (インドネシア語)</option>
+					<option value="th">th (タイ語)</option>
+					<option value="fr">fr (フランス語)</option>
+					<option value="ja">ja (日本語)</option>
+				</select>
+			</td>
+			<td>
+				<!-- BEGIN_MODULE Admin_Blog_SelectGlobal -->
+				<select name="google_translate_relation_bid[]">
+					<option value="">ブログを選択してください</option><!-- BEGIN loop -->
+					<option value="{value}">{indent}[raw]{label}</option><!-- END loop -->
+				</select>
+				<!-- END_MODULE Admin_Blog_SelectGlobal -->
+			</td>
+			<td>
+				<input type="button" class="item-delete acms-admin-btn-admin acms-admin-btn-admin-danger" value="削除" />
+			</td>
+		</tr>
+		</tbody>
+		<tfoot>
+		<tr>
+			<td colspan="4">
+				<input type="button" class="item-insert acms-admin-btn-admin" value="追加" />
+			</td>
+		</tr>
+		</tfoot>
+	</table>
+	<input type="hidden" name="field[]" value="google_translate_lang_label" />
+	<input type="hidden" name="field[]" value="google_translate_lang_code" />
+	<input type="hidden" name="field[]" value="google_translate_relation_bid" />
+	<input type="hidden" name="@google_translate_blog[]" value="google_translate_lang_label" />
+	<input type="hidden" name="@google_translate_blog[]" value="google_translate_lang_code" />
+	<input type="hidden" name="@google_translate_blog[]" value="google_translate_relation_bid" />
+	<input type="hidden" name="field[]" value="@google_translate_blog" />
+
+	<!-- BEGIN_MODULE Admin_Config -->
+	<h2 class="acms-admin-admin-title2">翻訳対象のフィールドを設定します</h2>
+	<table class="js-fieldgroup-sortable adminTable acms-admin-table-admin-edit">
+		<thead class="acms-admin-hide-sp">
+		<tr>
+			<th class="acms-admin-table-left acms-admin-admin-config-table-item-handle"> </th>
+			<th class="acms-admin-table-left">フィールド名</th>
+			<th class="acms-admin-table-left acms-admin-admin-config-table-action">削除</th>
+		</tr>
+		</thead>
+		<tbody>
+		<!-- BEGIN translationField:loop -->
+		<tr class="sortable-item">
+			<td class="item-handle">
+				<i class="acms-admin-icon-sort"></i>
+			</td>
+			<td>
+				<input type="text" name="translationFieldName[]" value="{translationFieldName}" class="acms-admin-form-width-full" />
+			</td>
+			<td>
+				<input type="button" class="item-delete acms-admin-btn-admin acms-admin-btn-admin-danger" value="削除" />
+			</td>
+		</tr>
+		<!-- END translationField:loop -->
+		<tr class="sortable-item item-template">
+			<td class="item-handle">
+				<i class="acms-admin-icon-sort"></i>
+			</td>
+			<td>
+				<input type="text" name="translationFieldName[]" value="" class="acms-admin-form-width-full" />
+			</td>
+			<td>
+				<input type="button" class="item-delete acms-admin-btn-admin acms-admin-btn-admin-danger" value="削除" />
+			</td>
+		</tr>
+		</tbody>
+		<tfoot>
+		<tr>
+			<td colspan="3">
+				<input type="button" class="item-insert acms-admin-btn-admin" value="追加" />
+			</td>
+		</tr>
+		</tfoot>
+	</table>
+	<input type="hidden" name="@translationField[]" value="translationFieldName" />
+	<input type="hidden" name="config[]" value="translationFieldName" />
+	<input type="hidden" name="config[]" value="@translationField" />
+
+
+	<h2 class="acms-admin-admin-title2">eidを指定するカスタムフィールドを設定します。（コピー先のブログにあったIDに変換します）</h2>
+	<table class="js-fieldgroup-sortable adminTable acms-admin-table-admin-edit">
+		<thead class="acms-admin-hide-sp">
+		<tr>
+			<th class="acms-admin-table-left acms-admin-admin-config-table-item-handle"> </th>
+			<th class="acms-admin-table-left">フィールド名</th>
+			<th class="acms-admin-table-left acms-admin-admin-config-table-action">削除</th>
+		</tr>
+		</thead>
+		<tbody>
+		<!-- BEGIN translationEidField:loop -->
+		<tr class="sortable-item">
+			<td class="item-handle">
+				<i class="acms-admin-icon-sort"></i>
+			</td>
+			<td>
+				<input type="text" name="translationEidFieldName[]" value="{translationEidFieldName}" class="acms-admin-form-width-full" />
+			</td>
+			<td>
+				<input type="button" class="item-delete acms-admin-btn-admin acms-admin-btn-admin-danger" value="削除" />
+			</td>
+		</tr>
+		<!-- END translationEidField:loop -->
+		<tr class="sortable-item item-template">
+			<td class="item-handle">
+				<i class="acms-admin-icon-sort"></i>
+			</td>
+			<td>
+				<input type="text" name="translationEidFieldName[]" value="" class="acms-admin-form-width-full" />
+			</td>
+			<td>
+				<input type="button" class="item-delete acms-admin-btn-admin acms-admin-btn-admin-danger" value="削除" />
+			</td>
+		</tr>
+		</tbody>
+		<tfoot>
+		<tr>
+			<td colspan="3">
+				<input type="button" class="item-insert acms-admin-btn-admin" value="追加" />
+			</td>
+		</tr>
+		</tfoot>
+	</table>
+	<input type="hidden" name="@translationEidField[]" value="translationEidFieldName" />
+	<input type="hidden" name="config[]" value="translationEidFieldName" />
+	<input type="hidden" name="config[]" value="@translationEidField" />
+
+	<h2 class="acms-admin-admin-title2">bidを指定するカスタムフィールドを設定します。（コピー先のブログにあったIDに変換します）</h2>
+	<table class="js-fieldgroup-sortable adminTable acms-admin-table-admin-edit">
+		<thead class="acms-admin-hide-sp">
+		<tr>
+			<th class="acms-admin-table-left acms-admin-admin-config-table-item-handle"> </th>
+			<th class="acms-admin-table-left">フィールド名</th>
+			<th class="acms-admin-table-left acms-admin-admin-config-table-action">削除</th>
+		</tr>
+		</thead>
+		<tbody>
+		<!-- BEGIN translationBidField:loop -->
+		<tr class="sortable-item">
+			<td class="item-handle">
+				<i class="acms-admin-icon-sort"></i>
+			</td>
+			<td>
+				<input type="text" name="translationBidFieldName[]" value="{translationBidFieldName}" class="acms-admin-form-width-full" />
+			</td>
+			<td>
+				<input type="button" class="item-delete acms-admin-btn-admin acms-admin-btn-admin-danger" value="削除" />
+			</td>
+		</tr>
+		<!-- END translationBidField:loop -->
+		<tr class="sortable-item item-template">
+			<td class="item-handle">
+				<i class="acms-admin-icon-sort"></i>
+			</td>
+			<td>
+				<input type="text" name="translationBidFieldName[]" value="" class="acms-admin-form-width-full" />
+			</td>
+			<td>
+				<input type="button" class="item-delete acms-admin-btn-admin acms-admin-btn-admin-danger" value="削除" />
+			</td>
+		</tr>
+		</tbody>
+		<tfoot>
+		<tr>
+			<td colspan="3">
+				<input type="button" class="item-insert acms-admin-btn-admin" value="追加" />
+			</td>
+		</tr>
+		</tfoot>
+	</table>
+	<input type="hidden" name="@translationBidField[]" value="translationBidFieldName" />
+	<input type="hidden" name="config[]" value="translationBidFieldName" />
+	<input type="hidden" name="config[]" value="@translationBidField" />
+
+	<h2 class="acms-admin-admin-title2">cidを指定するカスタムフィールドを設定します。（コピー先のブログにあったIDに変換します）</h2>
+	<table class="js-fieldgroup-sortable adminTable acms-admin-table-admin-edit">
+		<thead class="acms-admin-hide-sp">
+		<tr>
+			<th class="acms-admin-table-left acms-admin-admin-config-table-item-handle"> </th>
+			<th class="acms-admin-table-left">フィールド名</th>
+			<th class="acms-admin-table-left acms-admin-admin-config-table-action">削除</th>
+		</tr>
+		</thead>
+		<tbody>
+		<!-- BEGIN translationCidField:loop -->
+		<tr class="sortable-item">
+			<td class="item-handle">
+				<i class="acms-admin-icon-sort"></i>
+			</td>
+			<td>
+				<input type="text" name="translationCidFieldName[]" value="{translationCidFieldName}" class="acms-admin-form-width-full" />
+			</td>
+			<td>
+				<input type="button" class="item-delete acms-admin-btn-admin acms-admin-btn-admin-danger" value="削除" />
+			</td>
+		</tr>
+		<!-- END translationCidField:loop -->
+		<tr class="sortable-item item-template">
+			<td class="item-handle">
+				<i class="acms-admin-icon-sort"></i>
+			</td>
+			<td>
+				<input type="text" name="translationCidFieldName[]" value="" class="acms-admin-form-width-full" />
+			</td>
+			<td>
+				<input type="button" class="item-delete acms-admin-btn-admin acms-admin-btn-admin-danger" value="削除" />
+			</td>
+		</tr>
+		</tbody>
+		<tfoot>
+		<tr>
+			<td colspan="3">
+				<input type="button" class="item-insert acms-admin-btn-admin" value="追加" />
+			</td>
+		</tr>
+		</tfoot>
+	</table>
+	<input type="hidden" name="@translationCidField[]" value="translationCidFieldName" />
+	<input type="hidden" name="config[]" value="translationCidFieldName" />
+	<input type="hidden" name="config[]" value="@translationCidField" />
+	<!-- END_MODULE Admin_Config -->
+</form>
+<!-- END_MODULE GoogleTranslate_Config -->

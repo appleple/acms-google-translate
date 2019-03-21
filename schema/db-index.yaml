@@ -1,0 +1,5 @@
+%{PREFIX}google_translate_blog:
+  - PRIMARY KEY (base_blog_id,relation_bid)
+
+%{PREFIX}google_translate_entry:
+  - PRIMARY KEY (base_entry_id,relation_eid,relation_bid)

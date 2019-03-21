@@ -1,0 +1,129 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Spoke連携API",
+  "description":"Spokeとの連携APIのjsonフォーマット",
+  "type": "object",
+  "properties": {
+    "entries": {
+      "title": "未翻訳エントリ一覧",
+      "type": "array",
+      "items": {
+        "title": "エントリ一件のオブジェクト",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "エントリーID",
+            "type": "integer"
+          },
+          "blog_id": {
+            "description": "エントリーが所属するブログID",
+            "type": "integer"
+          },
+          "originalID": {
+            "description": "日本語エントリーのID（同じ記事は多言語間で共通のID）",
+            "type": "integer"
+          },
+          "baseLangCode": {
+            "description": "翻訳元の言語コード",
+            "type": "string"
+          },
+          "langCode": {
+            "description": "翻訳後の言語コード",
+            "type": "string"
+          },
+          "title": {
+            "description": "エントリータイトル（＊翻訳対象です）",
+            "type": "string"
+          },
+          "datetime": {
+            "description": "エントリーの日時",
+            "type": "string"
+          },
+          "posted_datetime": {
+            "description": "エントリーの作成日時",
+            "type": "string"
+          },
+          "updated_datetime": {
+            "description": "エントリーの更新日時",
+            "type": "string"
+          },
+          "fields": {
+            "title": "エントリーのフィールド情報",
+            "type": "array",
+            "items": {
+              "title": "フィールド一件の情報",
+              "type": "object",
+              "properties": {
+                "key": {
+                  "description": "フィールドのキー",
+                  "type": "string"
+                },
+                "value": {
+                  "description": "フィールドの値（＊翻訳対象です）",
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "units": {
+            "title": "エントリーのテキストユニット情報",
+            "type": "array",
+            "items": {
+              "title": "テキストユニット一件の情報",
+              "type": "object",
+              "properties": {
+                "text": {
+                  "description": "テキストユニットの値（＊翻訳対象です）",
+                  "type": "string"
+                },
+                "tag": {
+                  "description": "テキストユニットのタグセレクト",
+                  "type": "string"
+                },
+                "extend_tag": {
+                  "description": "テキストユニットの拡張タグ",
+                  "type": "string"
+                },
+                "clid": {
+                  "description": "ユニットID",
+                  "type": "integer"
+                },
+                "type": {
+                  "description": "ユニットタイプ",
+                  "type": "string"
+                },
+                "align": {
+                  "description": "ユニット配置",
+                  "type": "string"
+                },
+                "sort": {
+                  "description": "ユニットの順番",
+                  "type": "string"
+                },
+                "group": {
+                  "description": "ユニットグループ",
+                  "type": "string"
+                },
+                "attr": {
+                  "description": "ユニット属性",
+                  "type": "string"
+                },
+                "size": {
+                  "description": "ユニットのサイズ",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "links": [
+    {
+      "href": "http://spoke.sampleple.net/api/spoke/entries/?limit=100&from=0",
+      "method": "GET",
+      "rel": "self"
+    }
+  ]
+}
