@@ -165,7 +165,7 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
         if (in_array($tag, array('pre'))) {
             return 'none';
         }
-        if (in_array($tag, array('none', 'wysiwyg'))) {
+        if (in_array($tag, array('none', 'wysiwyg', 'p'))) {
             return 'html';
         }
         return 'text';

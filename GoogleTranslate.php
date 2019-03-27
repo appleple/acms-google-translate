@@ -118,13 +118,17 @@ class GoogleTranslate
      */
     public function translate()
     {
-        $this->textTranslated = $this->client->translateBatch($this->textTranslations, array(
-            'target' => $this->targetLanguage,
-            'format' => 'text',
-        ));
-        $this->htmlTranslated = $this->client->translateBatch($this->htmlTranslations, array(
-            'target' => $this->targetLanguage,
-            'format' => 'html',
-        ));
+        if (count($this->textTranslations) > 0) {
+            $this->textTranslated = $this->client->translateBatch($this->textTranslations, array(
+                'target' => $this->targetLanguage,
+                'format' => 'text',
+            ));
+        }
+        if (count($this->htmlTranslations) > 0) {
+            $this->htmlTranslated = $this->client->translateBatch($this->htmlTranslations, array(
+                'target' => $this->targetLanguage,
+                'format' => 'html',
+            ));
+        }
     }
 }
