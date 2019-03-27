@@ -343,7 +343,8 @@ class Engine
         $item = array();
         $units = loadColumn($eid);
         foreach ($units as $unit) {
-            if (detectUnitTypeSpecifier($unit['type']) !== 'text') {
+            $type = detectUnitTypeSpecifier($unit['type']);
+            if (!in_array($type, array('text', 'table', 'media', 'image', 'file'))) {
                 continue;
             }
             $item[] = $unit;

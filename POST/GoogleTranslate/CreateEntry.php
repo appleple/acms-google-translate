@@ -68,9 +68,8 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
         $googleTranslate = App::make('google_translate.google.translate');
         $googleTranslate->setTargetLanguage($code);
         $googleTranslate->addText('title', $entryInfo['title']);
-        foreach ($entryInfo['units'] as $i => $unit) {
-            $googleTranslate->addText('unit_' . $i, $unit['text']);
-        }
+        $this->addToTranslationUnits($entryInfo['units'], $googleTranslate);
+
         foreach ($entryInfo['fields'] as $i => $field) {
             foreach ($field['value'] as $j => $value) {
                 $googleTranslate->addText($field['key'] . '_'. $i, $value);
@@ -79,9 +78,8 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
         $googleTranslate->translate();
 
         $entryInfo['title'] = $googleTranslate->getText('title');
-        foreach ($entryInfo['units'] as $i => & $unit) {
-            $unit['text'] = $googleTranslate->getText('unit_' . $i);
-        }
+        $this->getTranslationUnits($entryInfo['units'], $googleTranslate);
+
         foreach ($entryInfo['fields'] as $i => & $field) {
             $temp = array();
             foreach ($field['value'] as $j => $value) {
@@ -92,6 +90,85 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
 
         $import = App::make('google_translate.import');
         $import->import($newEid, json_encode($entryInfo));
+    }
+
+    /**
+     * @param $units
+     * @param $googleTranslate
+     */
+    protected function addToTranslationUnits($units, $googleTranslate)
+    {
+        foreach ($units as $i => $unit) {
+            $type = detectUnitTypeSpecifier($unit['type']);
+            switch ($type) {
+                case 'text':
+                    $tagType = $this->getTextUnitFormat($unit['tag']);
+                    if ($tagType === 'html') {
+                        $googleTranslate->addHtml('unit_text_' . $i, $unit['text']);
+                    } else if ($tagType === 'text') {
+                        $googleTranslate->addText('unit_text_' . $i, $unit['text']);
+                    }
+                    break;
+                case 'table':
+                    $googleTranslate->addHtml('unit_table_' . $i, $unit['table']);
+                    break;
+                case 'media':
+                case 'image':
+                    $googleTranslate->addText('unit_caption_' . $i, $unit['caption']);
+                    $googleTranslate->addText('unit_alt_' . $i, $unit['alt']);
+                    break;
+                case 'file':
+                    $googleTranslate->addText('unit_caption_' . $i, $unit['caption']);
+                    break;
+            }
+        }
+    }
+
+    /**
+     * @param $units
+     * @param $googleTranslate
+     */
+    protected function getTranslationUnits(& $units, $googleTranslate)
+    {
+        foreach ($units as $i => & $unit) {
+            $type = detectUnitTypeSpecifier($unit['type']);
+            switch ($type) {
+                case 'text':
+                    $tagType = $this->getTextUnitFormat($unit['tag']);
+                    if ($tagType === 'html') {
+                        $unit['text'] = $googleTranslate->getHtml('unit_text_' . $i);
+                    } else if ($tagType === 'text') {
+                        $unit['text'] = $googleTranslate->getText('unit_text_' . $i);
+                    }
+                    break;
+                case 'table':
+                    $unit['table'] = $googleTranslate->getHtml('unit_table_' . $i);
+                    break;
+                case 'media':
+                case 'image':
+                    $unit['caption'] = $googleTranslate->getText('unit_caption_' . $i);
+                    $unit['alt'] = $googleTranslate->getText('unit_alt_' . $i);
+                    break;
+                case 'file':
+                    $unit['caption'] = $googleTranslate->getText('unit_caption_' . $i);
+                    break;
+            }
+        }
+    }
+
+    /**
+     * @param $tag
+     * @return string
+     */
+    protected function getTextUnitFormat($tag)
+    {
+        if (in_array($tag, array('pre'))) {
+            return 'none';
+        }
+        if (in_array($tag, array('none', 'wysiwyg'))) {
+            return 'html';
+        }
+        return 'text';
     }
 
     /**

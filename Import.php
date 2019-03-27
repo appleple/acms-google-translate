@@ -116,7 +116,23 @@ class Import
                 $clid = $new->clid;
                 foreach ($model->units as $i => $current) {
                     if ($current['clid'] === $clid) {
-                        $current['text'] = $new->text;
+                        $type = detectUnitTypeSpecifier($new->type);
+                        switch ($type) {
+                            case 'text':
+                                $current['text'] = $new->text;
+                                break;
+                            case 'table':
+                                $current['table'] = $new->table;
+                                break;
+                            case 'media':
+                            case 'image':
+                                $current['caption'] = $new->caption;
+                                $current['alt'] = $new->alt;
+                                break;
+                            case 'file':
+                                $current['caption'] = $new->caption;
+                                break;
+                        }
                         $current['id'] = uniqueString();
                         $model->units[$i] = $current;
                         break;

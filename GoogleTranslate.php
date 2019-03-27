@@ -17,17 +17,32 @@ class GoogleTranslate
     /**
      * @var array
      */
-    protected $translations = array();
+    protected $textTranslations = array();
 
     /**
      * @var array
      */
-    protected $translated = array();
+    protected $htmlTranslations = array();
 
     /**
      * @var array
      */
-    protected $keys = array();
+    protected $textTranslated = array();
+
+    /**
+     * @var array
+     */
+    protected $htmlTranslated = array();
+
+    /**
+     * @var array
+     */
+    protected $textKeys = array();
+
+    /**
+     * @var array
+     */
+    protected $htmlKeys = array();
 
     /**
      * GoogleTranslate constructor.
@@ -52,8 +67,18 @@ class GoogleTranslate
      */
     public function addText($key, $txt)
     {
-        $this->keys[] = $key;
-        $this->translations[] = $txt;
+        $this->textKeys[] = $key;
+        $this->textTranslations[] = $txt;
+    }
+
+    /**
+     * @param string $key
+     * @param string $txt
+     */
+    public function addHtml($key, $txt)
+    {
+        $this->htmlKeys[] = $key;
+        $this->htmlTranslations[] = $txt;
     }
 
     /**
@@ -62,12 +87,28 @@ class GoogleTranslate
      */
     public function getText($key)
     {
-        $index = array_search($key, $this->keys);
+        $index = array_search($key, $this->textKeys);
         if ($index === false) {
             return false;
         }
-        if (isset($this->translated[$index]['text'])) {
-            return $this->translated[$index]['text'];
+        if (isset($this->textTranslated[$index]['text'])) {
+            return $this->textTranslated[$index]['text'];
+        }
+        return false;
+    }
+
+    /**
+     * @param string $key
+     * @return string
+     */
+    public function getHtml($key)
+    {
+        $index = array_search($key, $this->htmlKeys);
+        if ($index === false) {
+            return false;
+        }
+        if (isset($this->htmlTranslated[$index]['text'])) {
+            return $this->htmlTranslated[$index]['text'];
         }
         return false;
     }
@@ -77,9 +118,13 @@ class GoogleTranslate
      */
     public function translate()
     {
-        $this->translated = $this->client->translateBatch($this->translations, array(
+        $this->textTranslated = $this->client->translateBatch($this->textTranslations, array(
             'target' => $this->targetLanguage,
             'format' => 'text',
+        ));
+        $this->htmlTranslated = $this->client->translateBatch($this->htmlTranslations, array(
+            'target' => $this->targetLanguage,
+            'format' => 'html',
         ));
     }
 }
