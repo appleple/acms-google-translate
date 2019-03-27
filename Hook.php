@@ -24,17 +24,19 @@ class Hook
             && $baseLangCode
             && $baseLangCode !== $langCode
         ) {
-            $translatedEntry = $engine->getEntryData(EID);
-            if ($translatedEntry['status'] === 'complete') {
-                $langCode = $langCode . '-x-mtfrom-' . $baseLangCode;
-                if (BID !== $baseBlogId && $translatedEntry['base_entry_id']) {
-                    $globalVars->set('TRANSLATION_ORIGIN_URL', acmsLink(array(
-                        'bid' => $baseBlogId,
-                        'eid' => $translatedEntry['base_entry_id'],
-                    )), false);
+            try {
+                $translatedEntry = $engine->getEntryData(EID);
+                if ($translatedEntry['status'] === 'complete') {
+                    $langCode = $langCode . '-x-mtfrom-' . $baseLangCode;
+                    if (BID !== $baseBlogId && $translatedEntry['base_entry_id']) {
+                        $globalVars->set('TRANSLATION_ORIGIN_URL', acmsLink(array(
+                            'bid' => $baseBlogId,
+                            'eid' => $translatedEntry['base_entry_id'],
+                        )), false);
+                    }
+                    $globalVars->set('TRANSLATED_BY_GOOGLE', 'yes');
                 }
-                $globalVars->set('TRANSLATED_BY_GOOGLE', 'yes');
-            }
+            } catch (\Exception $e) {}
         }
         $globalVars->set('TRANSLATION_LANG_BASE_CODE', $baseLangCode);
         $globalVars->set('TRANSLATION_LANG_CODE', $langCode);
