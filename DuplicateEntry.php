@@ -136,7 +136,7 @@ class DuplicateEntry
         $row['entry_status']    = 'close';
         $row['entry_title']     = $title;
         $row['entry_code']      = $code;
-        if ( config('update_datetime_as_duplicate_entry') !== 'off' ) {
+        if (config('google_translate_app_update_datetime_as_duplicate_entry') === 'on') {
             $row['entry_datetime'] = date('Y-m-d H:i:s', REQUEST_TIME);
         }
         $row['entry_posted_datetime']   = date('Y-m-d H:i:s', REQUEST_TIME);
@@ -389,7 +389,7 @@ class DuplicateEntry
         $row['entry_status']    = 'close';
         $row['entry_title']     = $title;
         $row['entry_code']      = $code;
-        if ( config('update_datetime_as_duplicate_entry') !== 'off' ) {
+        if (config('google_translate_app_update_datetime_as_duplicate_entry') === 'on') {
             $row['entry_datetime'] = date('Y-m-d H:i:s', REQUEST_TIME);
         }
         $row['entry_posted_datetime']   = date('Y-m-d H:i:s', REQUEST_TIME);
