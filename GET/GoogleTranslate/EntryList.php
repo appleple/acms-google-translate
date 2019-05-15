@@ -27,6 +27,7 @@ class EntryList extends ACMS_GET
         array_unshift($langList, array(
             'relation_bid' => $jaBid,
             'lang_label' => '日本語',
+            'lang_code' => 'ja',
         ));
         $managedGoogleTranslate = false;
 
