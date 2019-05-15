@@ -44,8 +44,8 @@
 				<td><a href="\{url\}" target="_blank">\{title\} - \{code\}</a></td>
 				<td>
 					<a href="\{edit_url\}" class="acms-admin-btn">編集</a>
-					<!-- BEGIN_IF [\{ja_bid\}/eq/%{BID}] -->
-					<!-- BEGIN_IF [\{ja_bid\}/neq/\{relation_bid\}] -->
+					<!-- BEGIN_IF [\{base_bid\}/eq/%{BID}] -->
+					<!-- BEGIN_IF [\{base_bid\}/neq/\{relation_bid\}] -->
 					<form action="" method="post" class="acms-admin-form acms-admin-inline">
 						<input type="submit" name="ACMS_POST_Entry_Delete" class="acms-admin-btn acms-admin-btn-danger" value="削除" onclick="javascript:return confirm('エントリーを削除します。よろしいですか？')" />
 						<input type="hidden" name="eid" value="\{relation_eid\}" />
@@ -56,7 +56,7 @@
 				</td>
 				<!-- ELSE -->
 				<td>
-					<!-- BEGIN_IF [\{ja_bid\}/eq/%{BID}] -->
+					<!-- BEGIN_IF [\{base_bid\}/eq/%{BID}] -->
 					<form method="post" class="acms-admin-inline">
 						<input type="hidden" name="target_bid" value="\{relation_bid\}">
 						<input type="hidden" name="original_eid" value="%{EID}">

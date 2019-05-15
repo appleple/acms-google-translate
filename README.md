@@ -104,9 +104,9 @@ or
 ...
 ```
 
-### グローバル変数を使う
+### 動的にTranslation API マークアップを実装する
 
-**Translation API マークアップ** を行うのに便利なグローバル変数が用意されていますので用いましょう。
+**Translation API マークアップ** を行うのに便利なグローバル変数とモジュールが用意されていますので用いましょう。
 
 |変数|説明|例|
 |:---|:---|:---|
@@ -122,9 +122,16 @@ or
 ```html
 <html lang="%{TRANSLATION_LANG_CODE}">
 <head>
+    <!-- BEGIN_MODULE GoogleTranslate_EntryList -->
     <!-- BEGIN_IF [%{TRANSLATED_BY_GOOGLE}/eq/yes] -->
-    <link rel="alternate machine-translated-from" hreflang="%{TRANSLATION_LANG_BASE_CODE}" href="%{TRANSLATION_ORIGIN_URL}">
+    <link rel="alternate machine-translated-from" href="%{TRANSLATION_ORIGIN_URL}" hreflang="%{TRANSLATION_LANG_BASE_CODE}">
     <!-- END_IF -->
+    <!-- BEGIN lang:loop -->
+    <!-- BEGIN_IF [{base_bid}/neq/{relation_bid}/_and_/%{BID}/neq/{relation_bid}] -->
+    <link rel="alternate" href="{url}" hreflang="{lang_code}">
+    <!-- END_IF -->
+    <!-- END lang:loop -->
+    <!-- END_MODULE GoogleTranslate_EntryList -->
 </head>
 <body>
 ...

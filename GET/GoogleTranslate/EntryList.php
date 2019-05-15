@@ -34,9 +34,10 @@ class EntryList extends ACMS_GET
             $targetBid = $lang['relation_bid'];
             $lang = array(
                 'label' => $lang['lang_label'],
+                'lang_code' => $lang['lang_code'],
                 'relation_bid' => $targetBid,
-                'ja_bid' => $jaBid,
-                'ja_eid' => $jaEid,
+                'base_bid' => $jaBid,
+                'base_eid' => $jaEid,
             );
             if ($entry = $this->searchLocalizationData($jaEid, $targetBid)) {
                 $lang = $this->addVars($lang, $entry);
