@@ -128,6 +128,10 @@ class Entry extends Model
         $this->fields = loadEntryField($this->id);
         $this->units = loadColumn($this->id);
         foreach ($this->units as & $unit) {
+            $type = detectUnitTypeSpecifier($unit['type']);
+            if ($type === 'custom') {
+                $unit['field'] = acmsUnserialize($unit['field']);
+            }
             $unit['id'] = uniqueString();
         }
     }
