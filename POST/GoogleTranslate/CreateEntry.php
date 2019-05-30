@@ -104,7 +104,7 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
                 case 'text':
                     $tagType = $this->getTextUnitFormat($unit['tag']);
                     if ($tagType === 'html') {
-                        $googleTranslate->addHtml('unit_text_' . $i, $unit['text']);
+                        $googleTranslate->addHtml('unit_text_' . $i, $this->newLineEscape($unit['text']));
                     } else if ($tagType === 'text') {
                         $googleTranslate->addText('unit_text_' . $i, $unit['text']);
                     }
@@ -136,7 +136,7 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
                 case 'text':
                     $tagType = $this->getTextUnitFormat($unit['tag']);
                     if ($tagType === 'html') {
-                        $unit['text'] = $googleTranslate->getHtml('unit_text_' . $i);
+                        $unit['text'] = $this->newLineUnEscape($googleTranslate->getHtml('unit_text_' . $i));
                     } else if ($tagType === 'text') {
                         $unit['text'] = $googleTranslate->getText('unit_text_' . $i);
                     }
@@ -170,6 +170,25 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
         }
         return 'text';
     }
+
+    /**
+     * @param $txt
+     * @return string
+     */
+    protected function newLineEscape($txt)
+    {
+        return preg_replace('/(\n|\r\n|\r)/u', '<br class="google-translate-br">', $txt);
+    }
+
+    /**
+     * @param $txt
+     * @return string
+     */
+    protected function newLineUnEscape($txt)
+    {
+        return preg_replace('@<br class="google-translate-br">@u', PHP_EOL, $txt);
+    }
+
 
     /**
      * @param int $eid
