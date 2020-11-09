@@ -18,16 +18,47 @@ class EntryList extends ACMS_GET
             return '';
         }
         $tpl = new Template($this->tpl, new ACMS_Corrector());
-        $jaBid = $this->getJaBlogId();
-        $jaEid = $this->getJaEntryId();
-
+        $baseBid = $this->getBaseBlogId();
+        $baseEid = $this->getBaseEntryId();
+        $engine = App::make('google_translate.engine');
+        $baseLangCode = $engine->getBaseLangCode();
+        $baseLangLabel = $baseLangCode;
+        switch ($baseLangCode) {
+            case 'ja':
+                $baseLangLabel = '日本語';
+                break;
+            case 'en':
+                $baseLangLabel = '英語';
+                break;
+            case 'zh-CN':
+                $baseLangLabel = '简体中文';
+                break;
+            case 'zh-TW':
+                $baseLangLabel = '繁体中文';
+                break;
+            case 'ko':
+                $baseLangLabel = '韓国語';
+                break;
+            case 'es':
+                $baseLangLabel = 'スペイン語';
+                break;
+            case 'id':
+                $baseLangLabel = 'インドネシア';
+                break;
+            case 'th':
+                $baseLangLabel = 'タイ語';
+                break;
+            case 'fr':
+                $baseLangLabel = 'フランス語';
+                break;
+        }
         $sql = SQL::newSelect('google_translate_blog');
-        $sql->addWhereOpr('base_blog_id', $jaBid);
+        $sql->addWhereOpr('base_blog_id', $baseBid);
         $langList = DB::query($sql->get(dsn()), 'all');
         array_unshift($langList, array(
-            'relation_bid' => $jaBid,
-            'lang_label' => '日本語',
-            'lang_code' => 'ja',
+            'relation_bid' => $baseBid,
+            'lang_label' => $baseLangLabel,
+            'lang_code' => $baseLangCode,
         ));
         $managedGoogleTranslate = false;
 
@@ -37,10 +68,10 @@ class EntryList extends ACMS_GET
                 'label' => $lang['lang_label'],
                 'lang_code' => $lang['lang_code'],
                 'relation_bid' => $targetBid,
-                'base_bid' => $jaBid,
-                'base_eid' => $jaEid,
+                'base_bid' => $baseBid,
+                'base_eid' => $baseEid,
             );
-            if ($entry = $this->searchLocalizationData($jaEid, $targetBid)) {
+            if ($entry = $this->searchLocalizationData($baseEid, $targetBid)) {
                 $lang = $this->addVars($lang, $entry);
                 $managedGoogleTranslate = true;
             } else if ($targetBid === BID) {
@@ -130,27 +161,27 @@ class EntryList extends ACMS_GET
         return false;
     }
 
-    protected function getJaBlogId()
+    protected function getBaseBlogId()
     {
         $sql = SQL::newSelect('google_translate_blog');
         $sql->addSelect('base_blog_id');
         $sql->addWhereOpr('relation_bid', BID);
-        $jaBid = DB::query($sql->get(dsn()), 'one');
-        if (empty($jaBid)) {
-            $jaBid = BID;
+        $baseBid = DB::query($sql->get(dsn()), 'one');
+        if (empty($baseBid)) {
+            $baseBid = BID;
         }
-        return $jaBid;
+        return $baseBid;
     }
 
-    protected function getJaEntryId()
+    protected function getBaseEntryId()
     {
         $sql = SQL::newSelect('google_translate_entry');
         $sql->addWhereOpr('relation_eid', EID);
         $sql->addWhereOpr('relation_bid', BID);
-        $jaEid = DB::query($sql->get(dsn()), 'one');
-        if (empty($jaEid)) {
-            $jaEid = EID;
+        $baseEid = DB::query($sql->get(dsn()), 'one');
+        if (empty($baseEid)) {
+            $baseEid = EID;
         }
-        return $jaEid;
+        return $baseEid;
     }
 }

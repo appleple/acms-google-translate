@@ -4,8 +4,60 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2d7301c0a5edec4836b462bef40de70e",
+    "content-hash": "b6925cfde660d242e4690edc8154b17a",
     "packages": [
+        {
+            "name": "babymarkt/deepl-php-lib",
+            "version": "v2.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Baby-Markt/deepl-php-lib.git",
+                "reference": "3ec0f3ab03d0cb964cc2ec4a46eb6a14decab86e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Baby-Markt/deepl-php-lib/zipball/3ec0f3ab03d0cb964cc2ec4a46eb6a14decab86e",
+                "reference": "3ec0f3ab03d0cb964cc2ec4a46eb6a14decab86e",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "php": ">=5.3 <8.0"
+            },
+            "require-dev": {
+                "phpmd/phpmd": "2.4.*",
+                "phpunit/phpunit": "^4.8",
+                "squizlabs/php_codesniffer": "^2.9"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "BabyMarkt\\DeepL\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Entwicklungsteam babymarkt.de",
+                    "email": "entwicklung@babymarkt.de"
+                }
+            ],
+            "description": "DeepL API Client Library supporting PHP >= 5.3 && PHP < 8.0",
+            "homepage": "https://github.com/Baby-Markt/deepl-php-lib",
+            "keywords": [
+                "babymarkt",
+                "deepl",
+                "deeply",
+                "i18n",
+                "translation",
+                "translator"
+            ],
+            "time": "2020-09-29T08:59:37+00:00"
+        },
         {
             "name": "container-interop/container-interop",
             "version": "1.2.0",
@@ -35,6 +87,7 @@
             ],
             "description": "Promoting the interoperability of container objects (DIC, SL, etc.)",
             "homepage": "https://github.com/container-interop/container-interop",
+            "abandoned": "psr/container",
             "time": "2017-02-14T19:40:03+00:00"
         },
         {
@@ -1312,17 +1365,17 @@
             ],
             "authors": [
                 {
+                    "name": "Ben Ramsey",
+                    "email": "ben@benramsey.com",
+                    "homepage": "https://benramsey.com"
+                },
+                {
                     "name": "Marijn Huizendveld",
                     "email": "marijn.huizendveld@gmail.com"
                 },
                 {
                     "name": "Thibaud Fabre",
                     "email": "thibaud@aztech.io"
-                },
-                {
-                    "name": "Ben Ramsey",
-                    "email": "ben@benramsey.com",
-                    "homepage": "https://benramsey.com"
                 }
             ],
             "description": "Formerly rhumsaa/uuid. A PHP 5.4+ library for generating RFC 4122 version 1, 3, 4, and 5 universally unique identifiers (UUID).",
@@ -1543,7 +1596,7 @@
                 },
                 {
                     "name": "Gert de Pagter",
-                    "email": "backendtea@gmail.com"
+                    "email": "BackEndTea@gmail.com"
                 }
             ],
             "description": "Symfony polyfill for ctype functions",

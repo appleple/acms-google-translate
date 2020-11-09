@@ -5,7 +5,8 @@
     "php": ">=5.5.0",
     "slim/slim": "^3.0",
     "webmozart/json": "^1.2",
-    "google/cloud": "^0.96.0"
+    "google/cloud": "^0.96.0",
+    "babymarkt/deepl-php-lib": "^2.0"
   },
   "config": {
     "vendor-dir": "vendor",

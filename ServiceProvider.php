@@ -4,6 +4,7 @@ namespace Acms\Plugins\GoogleTranslate;
 
 use App;
 use ACMS_App;
+use BabyMarkt\DeepL\DeepL;
 use Google\Cloud\Translate\TranslateClient;
 use Acms\Services\Facades\Storage;
 use Acms\Services\Facades\Config;
@@ -68,10 +69,15 @@ class ServiceProvider extends ACMS_App
             return new Import(dirname(__FILE__) . '/schema/schema.json');
         });
         App::bind('google_translate.google.translate', function () use ($baseBlogConfig) {
-            $client = new TranslateClient([
-                'key' => $baseBlogConfig->get('google_translate_google_translate_api_key'),
-            ]);
-            return new GoogleTranslate($client);
+            if ($baseBlogConfig->get('translate_service') === 'deepl') {
+                $client = new DeepL($baseBlogConfig->get('google_translate_deepl_api_key'));
+                return new DeepLTranslate($client);
+            } else {
+                $client = new TranslateClient([
+                    'key' => $baseBlogConfig->get('google_translate_google_translate_api_key'),
+                ]);
+                return new GoogleTranslate($client);
+            }
         });
 
         $hook = HookFactory::singleton();

@@ -74,9 +74,9 @@ class Import
     public function import($eid, $json)
     {
         $entry = $this->decode($json);
-        if ($entry->langCode === 'ja') {
-            throw new \RuntimeException('Can\'t update original entry.');
-        }
+//        if ($entry->langCode === 'ja') {
+//            throw new \RuntimeException('Can\'t update original entry.');
+//        }
         if (empty($entry)) {
             throw new \RuntimeException('Invalid request data.');
         }

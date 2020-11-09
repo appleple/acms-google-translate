@@ -59,14 +59,16 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
      */
     protected function googleTranslate($targetBid, $newEid)
     {
-        $code = $this->engine->getTargetLangCode(BID, $targetBid);
+        $baseLangCode = $this->engine->getBaseLangCode();
+        $targetLangCode = $this->engine->getTargetLangCode(BID, $targetBid);
 
         $entry = $this->engine->getEntryData($newEid);
         $targetField = $this->engine->getTranslationFieldFromEid($newEid);
         $entryInfo = $this->engine->buildEntryData($entry, $targetField);
 
         $googleTranslate = App::make('google_translate.google.translate');
-        $googleTranslate->setTargetLanguage($code);
+        $googleTranslate->setSourceLanguage($baseLangCode);
+        $googleTranslate->setTargetLanguage($targetLangCode);
         $googleTranslate->addText('title', $entryInfo['title']);
         $this->addToTranslationUnits($entryInfo['units'], $googleTranslate);
 

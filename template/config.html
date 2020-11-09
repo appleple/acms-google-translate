@@ -40,6 +40,26 @@
 	<h2 class="acms-admin-admin-title2">基本設定</h2>
 	<table class="acms-admin-table-admin-edit">
 		<tr>
+			<th>翻訳サービス</th>
+			<td>
+				<div class="acms-admin-form-radio">
+					<input type="radio" name="translate_service" value="google" {translate_service:checked#google} id="input-radio-translate_service-google" />
+					<label for="input-radio-translate_service-google">
+						<i class="acms-admin-ico-radio"></i>Google Translate</label>
+				</div>
+				<div class="acms-admin-form-radio">
+					<input type="radio" name="translate_service" value="deepl" {translate_service:checked#deepl} id="input-radio-translate_service-deepl" />
+					<label for="input-radio-translate_service-deepl">
+						<i class="acms-admin-ico-radio"></i>DeepL</label>
+				</div>
+				<input type="hidden" name="config[]" value="translate_service" />
+				<input type="hidden" name="translate_service:v#required" value="" id="translate_service-v-required" />
+				<!-- BEGIN translate_service:validator#required -->
+				<p class="acms-admin-text-error">必須入力です</p>
+				<!-- END translate_service:validator#required -->
+			</td>
+		</tr>
+		<tr>
 			<th>ベース言語</th>
 			<td>
 				<select name="google_translate_base_lang" class="acms-admin-form-width-full">
@@ -61,6 +81,13 @@
 			<td>
 				<input type="text" name="google_translate_google_translate_api_key" value="{google_translate_google_translate_api_key}" class="acms-admin-form-width-full">
 				<input type="hidden" name="config[]" value="google_translate_google_translate_api_key" />
+			</td>
+		</tr>
+		<tr>
+			<th><a href="https://console.developers.google.com">DeepL API Key</a></th>
+			<td>
+				<input type="text" name="google_translate_deepl_api_key" value="{google_translate_deepl_api_key}" class="acms-admin-form-width-full">
+				<input type="hidden" name="config[]" value="google_translate_deepl_api_key" />
 			</td>
 		</tr>
 		<tr>
