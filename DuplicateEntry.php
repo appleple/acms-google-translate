@@ -6,11 +6,21 @@ use DB;
 use SQL;
 use ACMS_RAM;
 use Common;
+use Config;
 use Entry;
 use Storage;
+use Field;
+use ACMS_Hook;
 
 class DuplicateEntry
 {
+    protected $config;
+
+    public function __construct()
+    {
+        $this->config = Config::loadBlogConfig(BID);
+    }
+
     public function dupe($eid, $newEid, $targetBid)
     {
         $DB = DB::singleton(dsn());
@@ -136,7 +146,7 @@ class DuplicateEntry
         $row['entry_status']    = 'close';
         $row['entry_title']     = $title;
         $row['entry_code']      = $code;
-        if (config('google_translate_app_update_datetime_as_duplicate_entry') === 'on') {
+        if ($this->config->get('google_translate_app_update_datetime_as_duplicate_entry') === 'on') {
             $row['entry_datetime'] = date('Y-m-d H:i:s', REQUEST_TIME);
         }
         $row['entry_posted_datetime']   = date('Y-m-d H:i:s', REQUEST_TIME);
@@ -184,7 +194,7 @@ class DuplicateEntry
         // field
         $Field  = loadEntryField($eid);
         $this->fieldDupe($Field, $targetBid);
-        Common::saveField('eid', $newEid, $Field, null, null, $targetBid);
+        Common::saveField('eid', $newEid, $Field, null, null, '', $targetBid);
         Common::saveFulltext('eid', $newEid, Common::loadEntryFulltext($newEid), $targetBid);
 
         //---------------
@@ -389,7 +399,7 @@ class DuplicateEntry
         $row['entry_status']    = 'close';
         $row['entry_title']     = $title;
         $row['entry_code']      = $code;
-        if (config('google_translate_app_update_datetime_as_duplicate_entry') === 'on') {
+        if ($this->config->get('google_translate_app_update_datetime_as_duplicate_entry') === 'on') {
             $row['entry_datetime'] = date('Y-m-d H:i:s', REQUEST_TIME);
         }
         $row['entry_posted_datetime']   = date('Y-m-d H:i:s', REQUEST_TIME);
@@ -658,7 +668,7 @@ class DuplicateEntry
      */
     protected function conversionEntryId(& $Field, $fd, $targetBid)
     {
-        $translationEidFields = configArray('translationEidFieldName');
+        $translationEidFields = $this->config->getArray('translationEidFieldName');
         if (in_array($fd, $translationEidFields)) {
             $eidValue = $Field->getArray($fd);
 
@@ -686,7 +696,7 @@ class DuplicateEntry
      */
     protected function conversionBlogId(& $Field, $fd, $targetBid)
     {
-        $translationBidFields = configArray('translationBidFieldName');
+        $translationBidFields = $this->config->getArray('translationBidFieldName');
         if (in_array($fd, $translationBidFields)) {
             $bidValue = $Field->getArray($fd);
             $Field->delete($fd);
@@ -721,7 +731,7 @@ class DuplicateEntry
      */
     protected function conversionCategoryId(& $Field, $fd, $targetBid)
     {
-        $translationCidFields = configArray('translationCidFieldName');
+        $translationCidFields = $this->config->getArray('translationCidFieldName');
         if (in_array($fd, $translationCidFields)) {
             $cidValue = $Field->getArray($fd);
             $Field->delete($fd);
