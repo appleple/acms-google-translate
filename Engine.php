@@ -225,8 +225,8 @@ class Engine
         ) {
             return $cid;
         }
-
-        if (config('google_translate_create_category') === 'create') {
+        $config = Config::loadBlogConfig(BID);
+        if ($config->get('google_translate_create_category') === 'create') {
             return $this->copyCategories($cid, $targetBid);
         }
         return false;
