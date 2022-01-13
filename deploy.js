@@ -52,7 +52,7 @@ const zipPromise = (src, dist) => {
 
 (async () => {
   try {
-    const copyFiles = fs.readdirSync('.').filter((file) => !/(\.git|\.gitignore|node_modules|vendor|deploy\.js)/.test(file));
+    const copyFiles = fs.readdirSync('.').filter((file) => !/(\.git|\.gitignore|build|node_modules|vendor|deploy\.js)/.test(file));
     fs.mkdirsSync(`GoogleTranslate`);
     fs.mkdirsSync(`build`);
     copyFiles.forEach((file) => {
