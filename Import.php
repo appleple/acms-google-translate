@@ -2,8 +2,6 @@
 
 namespace Acms\Plugins\GoogleTranslate;
 
-use Webmozart\Json\JsonDecoder;
-use Webmozart\Json\JsonValidator;
 use Acms\Plugins\GoogleTranslate\Models\Entry as EntryModel;
 use Acms\Plugins\GoogleTranslate\Exceptions\NotFoundException;
 use App;
@@ -12,16 +10,6 @@ use DB;
 
 class Import
 {
-    /**
-     * @var \Webmozart\Json\JsonDecoder
-     */
-    protected $decoder;
-
-    /**
-     * @var \Webmozart\Json\JsonValidator
-     */
-    protected $validator;
-
     /**
      * @var string
      */
@@ -38,8 +26,6 @@ class Import
      */
     public function __construct($schema)
     {
-        $this->decoder = new JsonDecoder();
-        $this->validator = new JsonValidator();
         $this->schema = $schema;
     }
 
@@ -47,20 +33,19 @@ class Import
      * JSONをオブジェクトにデコード
      *
      * @param string $json
-     * @throws \Webmozart\Json\ValidationFailedException
      * @return object
      */
     public function decode($json)
     {
-        $data = $this->decoder->decode($json);
-        $errors = $this->validator->validate($data, $this->schema);
+        $data = json_decode($json);
+        // $errors = $this->validator->validate($data, $this->schema);
 
-        if (count($errors) > 0) {
-            foreach ($errors as $error) {
-                App::exception($error); // stack exception
-            }
-        }
-        App::checkException(); // throw exception
+        // if (count($errors) > 0) {
+        //     foreach ($errors as $error) {
+        //         App::exception($error); // stack exception
+        //     }
+        // }
+        // App::checkException(); // throw exception
 
         return $data;
     }
@@ -68,7 +53,6 @@ class Import
     /**
      * @param int $eid
      * @param string $json
-     * @throws \Webmozart\Json\ValidationFailedException
      * @throws \Acms\Plugins\GoogleTranslate\Exceptions\NotFoundException
      */
     public function import($eid, $json)

@@ -4,7 +4,7 @@ namespace Acms\Plugins\GoogleTranslate;
 
 use App;
 use ACMS_App;
-use Google\Cloud\Translate\TranslateClient;
+use Google\Cloud\Translate\V2\TranslateClient;
 use Acms\Services\Facades\Storage;
 use Acms\Services\Facades\Config;
 use Acms\Services\Common\HookFactory;

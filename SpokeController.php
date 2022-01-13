@@ -122,7 +122,6 @@ class SpokeController
      * @param \Slim\Http\Request $request
      * @param \Slim\Http\Response $response
      * @return \Slim\Http\Response
-     * @throws \Webmozart\Json\ValidationFailedException
      */
     public function update(Request $request, Response $response)
     {
