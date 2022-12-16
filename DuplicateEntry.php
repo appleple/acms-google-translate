@@ -80,15 +80,10 @@ class DuplicateEntry
                     $row['column_field_2']  = implodeUnitData($newAry);
                     break;
                 case 'custom':
-                    $oldAry = explodeUnitData($row['column_field_6']);
-                    $newAry = array();
-                    foreach ( $oldAry as $old ) {
-                        $Field = acmsUnserialize($old);
-                        $this->fieldDupe($Field, $targetBid);
-
-                        $newAry[]   = acmsSerialize($Field);
-                    }
-                    $row['column_field_6']  = implodeUnitData($newAry);
+                    $old = $row['column_field_6'];
+                    $Field = acmsUnserialize($old);
+                    $this->fieldDupe($Field, $targetBid);
+                    $row['column_field_6'] = acmsSerialize($Field);
                 default:
                     break;
             }
@@ -279,61 +274,58 @@ class DuplicateEntry
                     $row['column_field_2']  = implodeUnitData($newAry);
                     break;
                 case 'custom':
-                    $oldAry = explodeUnitData($row['column_field_6']);
-                    $newAry = array();
-                    foreach ( $oldAry as $old ) {
-                        $Field = acmsUnserialize($old);
-                        foreach ( $Field->listFields() as $fd ) {
-                            if ( !strpos($fd, '@path') ) {
-                                continue;
+                    $old = $row['column_field_6'];
+
+                    $Field = acmsUnserialize($old);
+                    foreach ($Field->listFields() as $fd) {
+                        if ( !strpos($fd, '@path') ) {
+                            continue;
+                        }
+                        $base = substr($fd, 0, (-1 * strlen('@path')));
+                        $set = false;
+                        foreach ( $Field->getArray($fd, true) as $i => $path ) {
+                            if ( !Storage::isFile($sourceDir.$path) ) continue;
+                            $info       = pathinfo($path);
+                            $dirname    = empty($info['dirname']) ? '' : $info['dirname'].'/';
+                            Storage::makeDirectory(REVISON_ARCHIVES_DIR.$dirname);
+                            $ext        = empty($info['extension']) ? '' : '.'.$info['extension'];
+                            $newPath    = $dirname.uniqueString().$ext;
+
+                            $path       = $sourceDir.$path;
+                            $largePath  = otherSizeImagePath($path, 'large');
+                            $tinyPath   = otherSizeImagePath($path, 'tiny');
+                            $squarePath = otherSizeImagePath($path, 'square');
+
+                            $newLargePath   = otherSizeImagePath($newPath, 'large');
+                            $newTinyPath    = otherSizeImagePath($newPath, 'tiny');
+                            $newSquarePath  = otherSizeImagePath($newPath, 'square');
+
+                            Storage::copy($path, REVISON_ARCHIVES_DIR.$newPath);
+                            Storage::copy($largePath, REVISON_ARCHIVES_DIR.$newLargePath);
+                            Storage::copy($tinyPath, REVISON_ARCHIVES_DIR.$newTinyPath);
+                            Storage::copy($squarePath, REVISON_ARCHIVES_DIR.$newSquarePath);
+
+
+                            if ( !$set ) {
+                                $Field->delete($fd);
+                                $Field->delete($base.'@largePath');
+                                $Field->delete($base.'@tinyPath');
+                                $Field->delete($base.'@squarePath');
+                                $set = true;
                             }
-                            $base = substr($fd, 0, (-1 * strlen('@path')));
-                            $set = false;
-                            foreach ( $Field->getArray($fd, true) as $i => $path ) {
-                                if ( !Storage::isFile($sourceDir.$path) ) continue;
-                                $info       = pathinfo($path);
-                                $dirname    = empty($info['dirname']) ? '' : $info['dirname'].'/';
-                                Storage::makeDirectory(REVISON_ARCHIVES_DIR.$dirname);
-                                $ext        = empty($info['extension']) ? '' : '.'.$info['extension'];
-                                $newPath    = $dirname.uniqueString().$ext;
-
-                                $path       = $sourceDir.$path;
-                                $largePath  = otherSizeImagePath($path, 'large');
-                                $tinyPath   = otherSizeImagePath($path, 'tiny');
-                                $squarePath = otherSizeImagePath($path, 'square');
-
-                                $newLargePath   = otherSizeImagePath($newPath, 'large');
-                                $newTinyPath    = otherSizeImagePath($newPath, 'tiny');
-                                $newSquarePath  = otherSizeImagePath($newPath, 'square');
-
-                                Storage::copy($path, REVISON_ARCHIVES_DIR.$newPath);
-                                Storage::copy($largePath, REVISON_ARCHIVES_DIR.$newLargePath);
-                                Storage::copy($tinyPath, REVISON_ARCHIVES_DIR.$newTinyPath);
-                                Storage::copy($squarePath, REVISON_ARCHIVES_DIR.$newSquarePath);
-
-
-                                if ( !$set ) {
-                                    $Field->delete($fd);
-                                    $Field->delete($base.'@largePath');
-                                    $Field->delete($base.'@tinyPath');
-                                    $Field->delete($base.'@squarePath');
-                                    $set = true;
-                                }
-                                $Field->add($fd, $newPath);
-                                if ( Storage::isReadable($largePath) ) {
-                                    $Field->add($base.'@largePath', $newLargePath);
-                                }
-                                if ( Storage::isReadable($tinyPath) ) {
-                                    $Field->add($base.'@tinyPath', $newTinyPath);
-                                }
-                                if ( Storage::isReadable($squarePath) ) {
-                                    $Field->add($base.'@squarePath', $newSquarePath);
-                                }
+                            $Field->add($fd, $newPath);
+                            if ( Storage::isReadable($largePath) ) {
+                                $Field->add($base.'@largePath', $newLargePath);
+                            }
+                            if ( Storage::isReadable($tinyPath) ) {
+                                $Field->add($base.'@tinyPath', $newTinyPath);
+                            }
+                            if ( Storage::isReadable($squarePath) ) {
+                                $Field->add($base.'@squarePath', $newSquarePath);
                             }
                         }
-                        $newAry[]   = acmsSerialize($Field);
                     }
-                    $row['column_field_6']  = implodeUnitData($newAry);
+                    $row['column_field_6'] = acmsSerialize($Field);
                     break;
                 default:
                     break;
