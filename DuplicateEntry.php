@@ -2,6 +2,7 @@
 
 namespace Acms\Plugins\GoogleTranslate;
 
+use App;
 use DB;
 use SQL;
 use ACMS_RAM;
@@ -723,13 +724,14 @@ class DuplicateEntry
      */
     protected function conversionCategoryId(& $Field, $fd, $targetBid)
     {
+        $engine = App::make('google_translate.engine');
         $translationCidFields = $this->config->getArray('translationCidFieldName');
         if (in_array($fd, $translationCidFields)) {
             $cidValue = $Field->getArray($fd);
             $Field->delete($fd);
             foreach ($cidValue as $cid) {
                 $cid = intval($cid);
-                if ($targetCid = $this->checkCategory($cid, $targetBid)) {
+                if ($targetCid = $engine->checkCategory($cid, $targetBid)) {
                     $Field->add($fd, $targetCid);
                 } else {
                     $Field->add($fd, $cid);
