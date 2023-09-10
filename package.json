@@ -1,6 +1,6 @@
 {
   "name": "acms-google-translate",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Google Translate API を使って a-blog cmsを多言語化するプラグインです。",
   "main": "deploy.js",
   "scripts": {
