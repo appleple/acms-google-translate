@@ -2,14 +2,14 @@
   "name": "ablogcms/google-translate",
   "description": "エントリー翻訳プラグイン",
   "require": {
-    "php": ">=5.5",
+    "php": ">=7.2.5",
     "slim/slim": "^3.12.3",
-    "google/cloud": "^0.173.0"
+    "google/cloud": "^0.201.0"
   },
   "config": {
     "vendor-dir": "vendor",
     "platform": {
-      "php": "5.5.0"
+      "php": "7.2.5"
     }
   }
 }
