@@ -20,7 +20,7 @@ class ServiceProvider extends ACMS_App
     /**
      * @var string
      */
-    public $name = 'Google Translate';
+    public $name = 'GoogleTranslate';
 
     /**
      * @var string
@@ -121,7 +121,7 @@ class ServiceProvider extends ACMS_App
         $yamlTable = preg_replace(
             '/%{PREFIX}/',
             DB_PREFIX,
-            Storage::get(dirname(__FILE__) . '/schema/db-schema.yaml')
+            Storage::get(PLUGIN_LIB_DIR . $this->name . '/schema/db-schema.yaml')
         );
         $tablesData = Config::yamlParse($yamlTable);
         if (!is_array($tablesData)) {
@@ -135,7 +135,7 @@ class ServiceProvider extends ACMS_App
         $yamlIndex = preg_replace(
             '/%{PREFIX}/',
             DB_PREFIX,
-            Storage::get(dirname(__FILE__) . '/schema/db-index.yaml')
+            Storage::get(PLUGIN_LIB_DIR . $this->name . '/schema/db-index.yaml')
         );
         $indexData = Config::yamlParse($yamlIndex);
         if (!is_array($indexData)) {
