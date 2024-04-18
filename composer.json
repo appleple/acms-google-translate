@@ -1,15 +1,20 @@
 {
-  "name": "ablogcms/google-translate",
-  "description": "エントリー翻訳プラグイン",
-  "require": {
-    "php": ">=7.2.5",
-    "slim/slim": "^3.12.3",
-    "google/cloud": "^0.201.0"
-  },
-  "config": {
-    "vendor-dir": "vendor",
-    "platform": {
-      "php": "7.2.5"
+    "name": "com.appleple/google-translate",
+    "description": "a-blog cms extension.",
+    "scripts": {
+      "lint": "vendor/bin/phpcs --standard=phpcs.xml",
+      "format": "vendor/bin/phpcbf --standard=phpcs.xml",
+      "post-install-cmd": "\"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility",
+      "post-update-cmd" : "\"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "3.*",
+        "phpcompatibility/php-compatibility": "*"
+    },
+    "prefer-stable" : true,
+    "config": {
+        "platform": {
+            "php": "8.3"
+        }
     }
-  }
 }
