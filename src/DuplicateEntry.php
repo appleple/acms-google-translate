@@ -37,7 +37,7 @@ class DuplicateEntry
         $SQL->addWhereOpr('column_entry_id', $eid);
         $SQL->addWhereOpr('column_blog_id', $bid);
         $q  = $SQL->get(dsn());
-        if ($DB->query($q, 'fetch') and ($row = $DB->fetch($q))) {
+        if ($DB->query($q, 'fetch') && ($row = $DB->fetch($q))) {
             do {
                 $type = detectUnitTypeSpecifier($row['column_type']);
                 switch ($type) {
@@ -86,6 +86,7 @@ class DuplicateEntry
                         $Field = acmsUnserialize($old);
                         $this->fieldDupe($Field, $targetBid);
                         $row['column_field_6'] = acmsSerialize($Field);
+                        break;
                     default:
                         break;
                 }
@@ -152,7 +153,11 @@ class DuplicateEntry
         $row['entry_posted_datetime']   = date('Y-m-d H:i:s', REQUEST_TIME);
         $row['entry_updated_datetime']  = date('Y-m-d H:i:s', REQUEST_TIME);
         $row['entry_hash']              = md5(SYSTEM_GENERATED_DATETIME . date('Y-m-d H:i:s', REQUEST_TIME));
-        if (isset($row['entry_primary_image']) && isset($map[$row['entry_primary_image']]) && !empty($map[$row['entry_primary_image']])) {
+        if (
+            isset($row['entry_primary_image']) &&
+            isset($map[$row['entry_primary_image']]) &&
+            !empty($map[$row['entry_primary_image']])
+        ) {
             $row['entry_primary_image'] = $map[$row['entry_primary_image']];
         } else {
             $row['entry_primary_image'] = null;
@@ -177,7 +182,7 @@ class DuplicateEntry
         $SQL->addWhereOpr('tag_entry_id', $eid);
         $SQL->addWhereOpr('tag_blog_id', $bid);
         $q  = $SQL->get(dsn());
-        if ($DB->query($q, 'fetch') and ($row = $DB->fetch($q))) {
+        if ($DB->query($q, 'fetch') && ($row = $DB->fetch($q))) {
             do {
                 $row['tag_entry_id'] = $newEid;
                 $rpw['tag_blog_id'] = $targetBid;
@@ -237,7 +242,7 @@ class DuplicateEntry
         $SQL->addWhereOpr('column_entry_id', $eid);
         $SQL->addWhereOpr('column_blog_id', $bid);
         $q  = $SQL->get(dsn());
-        if ($DB->query($q, 'fetch') and ($row = $DB->fetch($q))) {
+        if ($DB->query($q, 'fetch') && ($row = $DB->fetch($q))) {
             do {
                 $type = detectUnitTypeSpecifier($row['column_type']);
                 switch ($type) {
@@ -412,7 +417,11 @@ class DuplicateEntry
         $row['entry_posted_datetime']   = date('Y-m-d H:i:s', REQUEST_TIME);
         $row['entry_updated_datetime']  = date('Y-m-d H:i:s', REQUEST_TIME);
         $row['entry_hash']              = md5(SYSTEM_GENERATED_DATETIME . date('Y-m-d H:i:s', REQUEST_TIME));
-        if (isset($row['entry_primary_image']) && isset($map[$row['entry_primary_image']]) && !empty($map[$row['entry_primary_image']])) {
+        if (
+            isset($row['entry_primary_image']) &&
+            isset($map[$row['entry_primary_image']]) &&
+            !empty($map[$row['entry_primary_image']])
+        ) {
             $row['entry_primary_image'] = $map[$row['entry_primary_image']];
         } else {
             $row['entry_primary_image'] = null;
@@ -469,7 +478,7 @@ class DuplicateEntry
         $SQL->addWhereOpr('tag_entry_id', $eid);
         $SQL->addWhereOpr('tag_blog_id', $bid);
         $q  = $SQL->get(dsn());
-        if ($DB->query($q, 'fetch') and ($row = $DB->fetch($q))) {
+        if ($DB->query($q, 'fetch') && ($row = $DB->fetch($q))) {
             do {
                 $row['tag_entry_id']    = $newEid;
                 $Insert = SQL::newInsert('tag_rev');
@@ -604,9 +613,8 @@ class DuplicateEntry
 
                     foreach ($ary_path as $path) {
                         if (
-                            1
-                            and Storage::isFile(ARCHIVES_DIR . $path)
-                            and preg_match('@^(.*?)([^/]+)(\.[^.]+)$@', $path, $match)
+                            Storage::isFile(ARCHIVES_DIR . $path) &&
+                            preg_match('@^(.*?)([^/]+)(\.[^.]+)$@', $path, $match)
                         ) {
                             $dirname    = $match[1];
                             $basename   = $match[2];
@@ -629,7 +637,7 @@ class DuplicateEntry
                             ) {
                                 $info['name']   = $name;
                                 $info['pfx']    = $pfx;
-                                $this->_filesDupe($Field, $Old_Field, $info, $int_filedindex);
+                                $this->filesDupe($Field, $Old_Field, $info, $int_filedindex);
                             }
                             $int_filedindex++;
                         }
@@ -639,7 +647,7 @@ class DuplicateEntry
         }
     }
 
-    protected function _filesDupe(&$Field, &$Old_Field, $info, $int_filedindex)
+    protected function filesDupe(&$Field, &$Old_Field, $info, $int_filedindex)
     {
         $key = $info['name'];
         $pfx = $info['pfx'];
@@ -649,9 +657,8 @@ class DuplicateEntry
         $extension = $info['extension'];
 
         if (
-            1
-            and $path = $Old_Field->get($_fd . $key, null, $int_filedindex)
-            and Storage::isFile(ARCHIVES_DIR . $path)
+            $path = $Old_Field->get($_fd . $key, null, $int_filedindex) &&
+            Storage::isFile(ARCHIVES_DIR . $path)
         ) {
             $newPath   = $dirname . $pfx . $newBasename . $extension;
 

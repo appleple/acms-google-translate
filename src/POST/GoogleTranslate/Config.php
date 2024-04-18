@@ -10,7 +10,7 @@ use Acms\Services\Facades\Config as ConfigHelper;
 
 class Config extends ACMS_POST
 {
-    function post()
+    public function post()
     {
         if (!sessionWithAdministration()) {
             die();

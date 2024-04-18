@@ -12,7 +12,7 @@ use ACMS_Corrector;
 
 class EntryList extends ACMS_GET
 {
-    function get()
+    public function get()
     {
         if (empty(EID)) {
             return '';

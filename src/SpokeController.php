@@ -62,7 +62,13 @@ class SpokeController
         $db = DB::singleton(dsn());
         $sql = SQL::newSelect('google_translate_entry', 'multi_lang_entry');
         $sql->addLeftJoin('entry', 'entry_id', 'relation_eid', 'entry', 'multi_lang_entry');
-        $sql->addLeftJoin('google_translate_blog', 'relation_bid', 'relation_bid', 'multi_lang_blog', 'multi_lang_entry');
+        $sql->addLeftJoin(
+            'google_translate_blog',
+            'relation_bid',
+            'relation_bid',
+            'multi_lang_blog',
+            'multi_lang_entry'
+        );
         $sql->addWhereOpr('status', 'original');
         $sql->addWhereOpr('entry_title', null, '<>');
 
@@ -167,7 +173,13 @@ class SpokeController
         $sql->addSelect('base_entry_id');
         $sql->addSelect('relation_eid');
         $sql->addSelect('lang_code');
-        $sql->addLeftJoin('google_translate_blog', 'relation_bid', 'relation_bid', 'multi_lang_blog', 'multi_lang_entry');
+        $sql->addLeftJoin(
+            'google_translate_blog',
+            'relation_bid',
+            'relation_bid',
+            'multi_lang_blog',
+            'multi_lang_entry'
+        );
         $sql->addWhereIn('base_entry_id', $ids);
         $translations = $db->query($sql->get(dsn()), 'all');
 

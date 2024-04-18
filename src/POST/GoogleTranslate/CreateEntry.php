@@ -18,7 +18,7 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
     /**
      * @return \Field
      */
-    function post()
+    public function post()
     {
         $targetBid = $this->Post->get('target_bid');
         $originalEid = $this->Post->get('original_eid');

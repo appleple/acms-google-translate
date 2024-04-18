@@ -11,7 +11,7 @@ use ACMS_Corrector;
 
 class CategoryList extends ACMS_GET
 {
-    function get()
+    public function get()
     {
         if (empty(CID)) {
             return '';
