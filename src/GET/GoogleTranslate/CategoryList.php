@@ -27,11 +27,11 @@ class CategoryList extends ACMS_GET
         }
         foreach ($langList as $lang) {
             $targetBid = $lang['relation_bid'];
-            $lang = array(
+            $lang = [
                 'lang_label' => $lang['lang_label'],
                 'lang_code' => $lang['lang_code'],
                 'google_translate_relation_bid' => $targetBid,
-            );
+            ];
             $tpl->add('lang:loop', $lang);
         }
         return $tpl->get();

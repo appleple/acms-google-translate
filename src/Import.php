@@ -85,7 +85,7 @@ class Import
      * @param \Acms\Plugins\GoogleTranslate\Contracts\Model $model
      * @param object $entry
      */
-    protected function buildEntry(& $model, $entry)
+    protected function buildEntry(&$model, $entry)
     {
         // entry
         foreach ($model->columns as $column) {

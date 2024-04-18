@@ -72,7 +72,7 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
 
         foreach ($entryInfo['fields'] as $i => $field) {
             foreach ($field['value'] as $j => $value) {
-                $googleTranslate->addText($field['key'] . '_'. $i, $value);
+                $googleTranslate->addText($field['key'] . '_' . $i, $value);
             }
         }
         $googleTranslate->translate();
@@ -81,9 +81,9 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
         $this->getTranslationUnits($entryInfo['units'], $googleTranslate);
 
         foreach ($entryInfo['fields'] as $i => & $field) {
-            $temp = array();
+            $temp = [];
             foreach ($field['value'] as $j => $value) {
-                $temp[] = $googleTranslate->getText($field['key'] . '_'. $i);
+                $temp[] = $googleTranslate->getText($field['key'] . '_' . $i);
             }
             $field['value'] = $temp;
         }
@@ -105,7 +105,7 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
                     $tagType = $this->getTextUnitFormat($unit['tag']);
                     if ($tagType === 'html') {
                         $googleTranslate->addHtml('unit_text_' . $i, $this->newLineEscape($unit['text']));
-                    } else if ($tagType === 'text') {
+                    } elseif ($tagType === 'text') {
                         $googleTranslate->addText('unit_text_' . $i, $unit['text']);
                     }
                     break;
@@ -128,7 +128,7 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
      * @param $units
      * @param $googleTranslate
      */
-    protected function getTranslationUnits(& $units, $googleTranslate)
+    protected function getTranslationUnits(&$units, $googleTranslate)
     {
         foreach ($units as $i => & $unit) {
             $type = detectUnitTypeSpecifier($unit['type']);
@@ -137,7 +137,7 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
                     $tagType = $this->getTextUnitFormat($unit['tag']);
                     if ($tagType === 'html') {
                         $unit['text'] = $this->newLineUnEscape($googleTranslate->getHtml('unit_text_' . $i));
-                    } else if ($tagType === 'text') {
+                    } elseif ($tagType === 'text') {
                         $unit['text'] = $googleTranslate->getText('unit_text_' . $i);
                     }
                     break;
@@ -162,10 +162,10 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
      */
     protected function getTextUnitFormat($tag)
     {
-        if (in_array($tag, array('pre'))) {
+        if (in_array($tag, ['pre'])) {
             return 'none';
         }
-        if (in_array($tag, array('none', 'wysiwyg', 'p'))) {
+        if (in_array($tag, ['none', 'wysiwyg', 'p'])) {
             return 'html';
         }
         return 'text';

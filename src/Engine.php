@@ -58,12 +58,12 @@ class Engine
      */
     public function loadConfig($bid = BID)
     {
-        $config = new Field;
+        $config = new Field();
 
         $SQL = SQL::newSelect('google_translate_blog');
         $SQL->addWhereOpr('base_blog_id', $bid);
         $all = DB::query($SQL->get(dsn()), 'all');
-        foreach ( $all as $row ) {
+        foreach ($all as $row) {
             $config->add('google_translate_relation_bid', $row['relation_bid']);
             $config->add('google_translate_lang_label', $row['lang_label']);
             $config->add('google_translate_lang_code', $row['lang_code']);
@@ -123,7 +123,7 @@ class Engine
     public function buildEntryData($entry, $targetField, $detail = true)
     {
         $eid = $entry['entry_id'];
-        $item = array(
+        $item = [
             'id' => intval($eid),
             'blog_id' => intval($entry['entry_blog_id']),
             'originalID' => intval($entry['base_entry_id']),
@@ -133,7 +133,7 @@ class Engine
             'datetime' => $entry['entry_datetime'],
             'posted_datetime' => $entry['entry_posted_datetime'],
             'updated_datetime' => $entry['entry_updated_datetime'],
-        );
+        ];
         if ($detail) {
             $item['fields'] = $this->buildFieldData($eid, $targetField);
             $item['units'] = $this->buildUnitDate($eid);
@@ -217,7 +217,8 @@ class Engine
 
         // グローバルカテゴリをチェック
         $categoryBid = ACMS_RAM::categoryBlog($cid);
-        if (1
+        if (
+            1
             && $categoryBid
             && ACMS_RAM::categoryScope($cid) === 'global'
             && ACMS_RAM::blogLeft($categoryBid) <= ACMS_RAM::blogLeft($targetBid)
@@ -314,7 +315,7 @@ class Engine
      */
     protected function buildFieldData($eid, $targetField)
     {
-        $item = array();
+        $item = [];
         $fields = loadEntryField($eid);
         foreach ($fields->listFields() as $key) {
             $values = $fields->getArray($key);
@@ -324,10 +325,10 @@ class Engine
             if (empty($values)) {
                 continue;
             }
-            $item[] = array(
+            $item[] = [
                 'key' => $key,
                 'value' => $values,
-            );
+            ];
         }
         return $item;
     }
@@ -340,11 +341,11 @@ class Engine
      */
     protected function buildUnitDate($eid)
     {
-        $item = array();
+        $item = [];
         $units = loadColumn($eid);
         foreach ($units as $unit) {
             $type = detectUnitTypeSpecifier($unit['type']);
-            if (!in_array($type, array('text', 'table', 'media', 'image', 'file'))) {
+            if (!in_array($type, ['text', 'table', 'media', 'image', 'file'])) {
                 continue;
             }
             $item[] = $unit;
@@ -354,9 +355,15 @@ class Engine
 
     protected function changeParentCategory($cid, $toPid, $targetBid)
     {
-        if ( !$cid = idval($cid) ) return false;
-        if ( $toPid == $cid ) return false;
-        if ( $targetBid <> ACMS_RAM::categoryBlog($cid) ) return false;
+        if (!$cid = idval($cid)) {
+            return false;
+        }
+        if ($toPid == $cid) {
+            return false;
+        }
+        if ($targetBid <> ACMS_RAM::categoryBlog($cid)) {
+            return false;
+        }
 
         $DB = DB::singleton(dsn());
 
@@ -369,7 +376,9 @@ class Engine
         $SQL->addSelect('category_sort');
         $SQL->addWhereOpr('category_id', $cid);
         $SQL->addWhereOpr('category_blog_id', $targetBid);
-        if ( !$row = $DB->query($SQL->get(dsn()), 'row') ) die();
+        if (!$row = $DB->query($SQL->get(dsn()), 'row')) {
+            die();
+        }
         $fromLeft   = intval($row['category_left']);
         $fromRight  = intval($row['category_right']);
         $fromPid    = intval($row['category_parent']);
@@ -377,21 +386,27 @@ class Engine
 
         //-------------
         // same parent
-        if ( $toPid == $fromPid ) return false;
+        if ($toPid == $fromPid) {
+            return false;
+        }
 
         //------------------------
         // to: left, right, sort
-        if ( !empty($toPid) ) {
+        if (!empty($toPid)) {
             $SQL    = SQL::newSelect('category');
             $SQL->addSelect('category_left');
             $SQL->addSelect('category_right');
             $SQL->addWhereOpr('category_id', $toPid);
             $SQL->addWhereOpr('category_blog_id', $targetBid);
-            if ( !$row = $DB->query($SQL->get(dsn()), 'row') ) die();
+            if (!$row = $DB->query($SQL->get(dsn()), 'row')) {
+                die();
+            }
             $toLeft     = $row['category_left'];
             $toRight    = $row['category_right'];
 
-            if ( $toLeft > $fromLeft and $toRight < $fromRight ) return false;
+            if ($toLeft > $fromLeft and $toRight < $fromRight) {
+                return false;
+            }
 
             //-------
             // toSort
@@ -402,19 +417,20 @@ class Engine
             $SQL->setOrder('category_sort', 'DESC');
             $SQL->setLimit(1);
             $toSort = intval($DB->query($SQL->get(dsn()), 'one')) + 1;
-
         } else {
-
             $SQL    = SQL::newSelect('category');
             $SQL->addSelect('category_right');
             $SQL->addSelect('category_sort');
             $SQL->addWhereOpr('category_blog_id', $targetBid);
             $SQL->setOrder('category_right', 'DESC');
             $SQL->setLimit(1);
-            if ( !$row = $DB->query($SQL->get(dsn()), 'row') ) die();
+            if (!$row = $DB->query($SQL->get(dsn()), 'row')) {
+                die();
+            }
             $toLeft     = intval($row['category_right']);
             $toRight    = $toLeft   + 1;
-            $toSort     = intval($row['category_sort']) + 1;;
+            $toSort     = intval($row['category_sort']) + 1;
+            ;
         }
 
         //-----
@@ -425,15 +441,15 @@ class Engine
         // align
         $SQL    = SQL::newUpdate('category');
         $SQL->addWhereOpr('category_blog_id', $targetBid);
-        if ( $fromRight > $toRight ) {
+        if ($fromRight > $toRight) {
             //-------
             // upper
             $delta  = $fromLeft - $toRight;
 
             $Case   = SQL::newCase();
             $Case->add(
-                SQL::newOprBw('category_left', $fromLeft, $fromRight)
-                , SQL::newOpr('category_left', $delta, '-')
+                SQL::newOprBw('category_left', $fromLeft, $fromRight),
+                SQL::newOpr('category_left', $delta, '-')
             );
             $Where  = SQL::newWhere();
             $Where->addWhereOpr('category_left', $toRight, '>=');
@@ -444,8 +460,8 @@ class Engine
 
             $Case   = SQL::newCase();
             $Case->add(
-                SQL::newOprBw('category_right', $fromLeft, $fromRight)
-                , SQL::newOpr('category_right', $delta, '-')
+                SQL::newOprBw('category_right', $fromLeft, $fromRight),
+                SQL::newOpr('category_right', $delta, '-')
             );
             $Where  = SQL::newWhere();
             $Where->addWhereOpr('category_right', $toRight, '>=');
@@ -453,7 +469,6 @@ class Engine
             $Case->add($Where, SQL::newOpr('category_right', $gap, '+'));
             $Case->setElse(SQL::newField('category_right'));
             $SQL->addUpdate('category_right', $Case);
-
         } else {
             //------
             // lower
@@ -461,8 +476,8 @@ class Engine
 
             $Case   = SQL::newCase();
             $Case->add(
-                SQL::newOprBw('category_left', $fromLeft, $fromRight)
-                , SQL::newOpr('category_left', $delta, '+')
+                SQL::newOprBw('category_left', $fromLeft, $fromRight),
+                SQL::newOpr('category_left', $delta, '+')
             );
             $Where  = SQL::newWhere();
             $Where->addWhereOpr('category_left', $fromRight, '>');
@@ -473,8 +488,8 @@ class Engine
 
             $Case   = SQL::newCase();
             $Case->add(
-                SQL::newOprBw('category_right', $fromLeft, $fromRight)
-                , SQL::newOpr('category_right', $delta, '+')
+                SQL::newOprBw('category_right', $fromLeft, $fromRight),
+                SQL::newOpr('category_right', $delta, '+')
             );
             $Where  = SQL::newWhere();
             $Where->addWhereOpr('category_right', $fromRight, '>');
@@ -482,7 +497,6 @@ class Engine
             $Case->add($Where, SQL::newOpr('category_right', $gap, '-'));
             $Case->setElse(SQL::newField('category_right'));
             $SQL->addUpdate('category_right', $Case);
-
         }
         $DB->query($SQL->get(dsn()), 'exec');
 

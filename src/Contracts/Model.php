@@ -12,7 +12,7 @@ abstract class Model
     /**
      * @var array
      */
-    protected $columns = array();
+    protected $columns = [];
 
     /**
      * Model constructor.
@@ -20,7 +20,7 @@ abstract class Model
     public function __construct()
     {
         $this->columns = $this->setColumns();
-        foreach ( $this->columns as $column ) {
+        foreach ($this->columns as $column) {
             $this->{$column} = null;
         }
     }
@@ -81,9 +81,9 @@ abstract class Model
     {
         $getter = 'get' . ucfirst($key);
 
-        if ( method_exists($this, $getter)  ) {
+        if (method_exists($this, $getter)) {
             return call_user_func($getter);
-        } else if ( property_exists($this, $key)  ) {
+        } elseif (property_exists($this, $key)) {
             return $this->{$key};
         }
         throw new \RuntimeException("Property \"$key\" does not exist.");
@@ -99,7 +99,7 @@ abstract class Model
     {
         $setter = 'get' . ucfirst($key);
 
-        if ( method_exists($this, $setter) ) {
+        if (method_exists($this, $setter)) {
             call_user_func($setter, $value);
         }
         $this->{$key} = $value;

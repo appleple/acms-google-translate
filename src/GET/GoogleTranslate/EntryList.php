@@ -24,26 +24,26 @@ class EntryList extends ACMS_GET
         $sql = SQL::newSelect('google_translate_blog');
         $sql->addWhereOpr('base_blog_id', $jaBid);
         $langList = DB::query($sql->get(dsn()), 'all');
-        array_unshift($langList, array(
+        array_unshift($langList, [
             'relation_bid' => $jaBid,
             'lang_label' => '日本語',
             'lang_code' => 'ja',
-        ));
+        ]);
         $managedGoogleTranslate = false;
 
         foreach ($langList as $lang) {
             $targetBid = $lang['relation_bid'];
-            $lang = array(
+            $lang = [
                 'label' => $lang['lang_label'],
                 'lang_code' => $lang['lang_code'],
                 'relation_bid' => $targetBid,
                 'base_bid' => $jaBid,
                 'base_eid' => $jaEid,
-            );
+            ];
             if ($entry = $this->searchLocalizationData($jaEid, $targetBid)) {
                 $lang = $this->addVars($lang, $entry);
                 $managedGoogleTranslate = true;
-            } else if ($targetBid === BID) {
+            } elseif ($targetBid === BID) {
                 $entry = ACMS_RAM::entry(EID);
                 $entry['status'] = 'original';
                 $lang = $this->addVars($lang, $entry);
@@ -70,29 +70,29 @@ class EntryList extends ACMS_GET
         $lang['status'] = $status['label'];
         $lang['status_code'] = $status['code'];
         $lang['category_label'] = ACMS_RAM::categoryName($entry['entry_category_id']);
-        $lang['url'] = acmsLink(array(
+        $lang['url'] = acmsLink([
             'eid' => $entry['entry_id'],
-        ));
-        $lang['edit_url'] = acmsLink(array(
+        ]);
+        $lang['edit_url'] = acmsLink([
             'bid' => $entry['entry_blog_id'],
             'eid' => $entry['entry_id'],
             'cid' => $entry['entry_category_id'],
             'admin' => 'entry_editor',
-        ));
-        $lang['category_editUrl'] = acmsLink(array(
+        ]);
+        $lang['category_editUrl'] = acmsLink([
             'bid' => $entry['entry_blog_id'],
             'cid' => $entry['entry_category_id'],
             'admin' => 'category_edit',
-        ));
+        ]);
         return $lang;
     }
 
     protected function getStatusLabel($status)
     {
-        $label = array(
+        $label = [
             'label' => '依頼前',
             'code' => 'danger',
-        );
+        ];
         switch ($status) {
             case 'original':
                 $label['label'] = 'オリジナル';

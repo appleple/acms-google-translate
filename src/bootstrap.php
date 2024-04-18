@@ -14,26 +14,26 @@ $app = new \Slim\App([
 $c = $app->getContainer();
 $c['errorHandler'] = function ($c) {
     return function ($request, $response, $exception) use ($c) {
-        return $response->withJson(array(
+        return $response->withJson([
             'message' => $exception->getMessage(),
             'code' => 500,
-        ), 500);
+        ], 500);
     };
 };
 $c['notFoundHandler'] = function ($c) {
     return function ($request, $response) use ($c) {
-        return $response->withJson(array(
+        return $response->withJson([
             'message' => 'Resource not found.',
             'code' => 404,
-        ), 404);
+        ], 404);
     };
 };
 $c['notAllowedHandler'] = function ($c) {
     return function ($request, $response, $methods) use ($c) {
-        return $response->withJson(array(
+        return $response->withJson([
             'message' => 'Method must be one of: ' . implode(', ', $methods),
             'code' => 405,
-        ), 405);
+        ], 405);
     };
 };
 
@@ -56,7 +56,7 @@ $app->get('/api/spoke/entries/{eid}/', SpokeController::class . ':show');
  *
  * post: /api/spoke/entries/{eid}/
  */
-$app->map(array('POST', 'PUT'), '/api/spoke/entries/{eid}/', SpokeController::class . ':update');
+$app->map(['POST', 'PUT'], '/api/spoke/entries/{eid}/', SpokeController::class . ':update');
 
 $app->run();
 die();

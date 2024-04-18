@@ -27,7 +27,7 @@ class SpokeController
     /**
      * @var array
      */
-    protected $targetField = array();
+    protected $targetField = [];
 
     public function __construct()
     {
@@ -44,10 +44,10 @@ class SpokeController
      */
     public function index(Request $request, Response $response)
     {
-        $json = array(
+        $json = [
             'total_count' => 0,
-            'entries' => array(),
-        );
+            'entries' => [],
+        ];
         $limit = 100;
         $offset = 0;
         $params = $request->getQueryParams();
@@ -75,8 +75,8 @@ class SpokeController
         $q = $sql->get(dsn());
         $db->query($q, 'fetch');
 
-        $items = array();
-        $ids = array();
+        $items = [];
+        $ids = [];
         while ($entry = $db->fetch($q)) {
             $items[] = $entry;
             $ids[] = $entry['entry_id'];
@@ -84,7 +84,7 @@ class SpokeController
         $translationsList = $this->getTranslationsList($ids);
         foreach ($items as $entry) {
             $jaId = intval($entry['entry_id']);
-            $item = $this->engine->buildEntryData($entry, array(), false);
+            $item = $this->engine->buildEntryData($entry, [], false);
             $item['translations'] = null;
             if (isset($translationsList[$jaId])) {
                 $item['translations'] = $translationsList[$jaId];
@@ -148,10 +148,10 @@ class SpokeController
      */
     protected function errorResponse($response, $message, $code)
     {
-        return $response->withJson(array(
+        return $response->withJson([
             'message' => $message,
             'code' => $code,
-        ), $code);
+        ], $code);
     }
 
     /**
@@ -160,7 +160,7 @@ class SpokeController
      */
     protected function getTranslationsList($ids)
     {
-        $translationsList = array();
+        $translationsList = [];
 
         $db = DB::singleton(dsn());
         $sql = SQL::newSelect('google_translate_entry', 'multi_lang_entry');
@@ -178,7 +178,7 @@ class SpokeController
                 continue;
             }
             if (!isset($translationsList[$jaId])) {
-                $translation[$jaId] = array();
+                $translation[$jaId] = [];
             }
             $translationsList[$jaId][$translation['lang_code']] = $this->getDetailEndpoint($relationId);
         }

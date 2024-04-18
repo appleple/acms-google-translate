@@ -18,8 +18,8 @@ class BlogList extends ACMS_GET
         $sql = SQL::newSelect('blog');
         $all = DB::query($sql->get(dsn()), 'all');
 
-        return $tpl->render(array(
+        return $tpl->render([
             'blog' => $all,
-        ));
+        ]);
     }
 }

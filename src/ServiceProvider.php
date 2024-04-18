@@ -42,10 +42,10 @@ class ServiceProvider extends ACMS_App
      */
     public $desc = 'Google Translate API を使ってエントリーを多言語化する拡張アプリです。';
 
-    protected $installTable = array(
+    protected $installTable = [
         'google_translate_blog',
         'google_translate_entry',
-    );
+    ];
 
     /**
      * サービスの初期処理
@@ -75,7 +75,7 @@ class ServiceProvider extends ACMS_App
         });
 
         $hook = HookFactory::singleton();
-        $hook->attach('google_translate.hook', new Hook);
+        $hook->attach('google_translate.hook', new Hook());
 
         $inject = InjectTemplate::singleton();
         $inject->add('admin-entry-editor-top', PLUGIN_DIR . 'GoogleTranslate/template/entry-lang-check.html');
@@ -118,22 +118,28 @@ class ServiceProvider extends ACMS_App
 
         //---------------------
         // テーブルデータ読み込み
-        $yamlTable = preg_replace('/%{PREFIX}/', DB_PREFIX,
-            Storage::get(dirname(__FILE__) . '/schema/db-schema.yaml'));
+        $yamlTable = preg_replace(
+            '/%{PREFIX}/',
+            DB_PREFIX,
+            Storage::get(dirname(__FILE__) . '/schema/db-schema.yaml')
+        );
         $tablesData = Config::yamlParse($yamlTable);
         if (!is_array($tablesData)) {
-            $tablesData = array();
+            $tablesData = [];
         }
         if (!empty($tablesData[0])) {
             unset($tablesData[0]);
         }
-        $tableList = array_merge(array_diff(array_keys($tablesData), array('')));
+        $tableList = array_merge(array_diff(array_keys($tablesData), ['']));
 
-        $yamlIndex = preg_replace('/%{PREFIX}/', DB_PREFIX,
-            Storage::get(dirname(__FILE__) . '/schema/db-index.yaml'));
+        $yamlIndex = preg_replace(
+            '/%{PREFIX}/',
+            DB_PREFIX,
+            Storage::get(dirname(__FILE__) . '/schema/db-index.yaml')
+        );
         $indexData = Config::yamlParse($yamlIndex);
         if (!is_array($indexData)) {
-            $indexData = array();
+            $indexData = [];
         }
         if (!empty($indexData[0])) {
             unset($indexData[0]);

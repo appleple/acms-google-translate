@@ -19,7 +19,8 @@ class Hook
         if ($code = $engine->getLangCode(BID)) {
             $langCode = $code;
         }
-        if (1
+        if (
+            1
             && EID
             && $baseLangCode
             && $baseLangCode !== $langCode
@@ -29,14 +30,15 @@ class Hook
                 if ($translatedEntry['status'] === 'complete') {
                     $langCode = $langCode . '-x-mtfrom-' . $baseLangCode;
                     if (BID !== $baseBlogId && $translatedEntry['base_entry_id']) {
-                        $globalVars->set('TRANSLATION_ORIGIN_URL', acmsLink(array(
+                        $globalVars->set('TRANSLATION_ORIGIN_URL', acmsLink([
                             'bid' => $baseBlogId,
                             'eid' => $translatedEntry['base_entry_id'],
-                        )), false);
+                        ]), false);
                     }
                     $globalVars->set('TRANSLATED_BY_GOOGLE', 'yes');
                 }
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+            }
         }
         $globalVars->set('TRANSLATION_LANG_BASE_CODE', $baseLangCode);
         $globalVars->set('TRANSLATION_LANG_CODE', $langCode);

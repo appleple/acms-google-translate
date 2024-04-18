@@ -17,32 +17,32 @@ class GoogleTranslate
     /**
      * @var array
      */
-    protected $textTranslations = array();
+    protected $textTranslations = [];
 
     /**
      * @var array
      */
-    protected $htmlTranslations = array();
+    protected $htmlTranslations = [];
 
     /**
      * @var array
      */
-    protected $textTranslated = array();
+    protected $textTranslated = [];
 
     /**
      * @var array
      */
-    protected $htmlTranslated = array();
+    protected $htmlTranslated = [];
 
     /**
      * @var array
      */
-    protected $textKeys = array();
+    protected $textKeys = [];
 
     /**
      * @var array
      */
-    protected $htmlKeys = array();
+    protected $htmlKeys = [];
 
     /**
      * GoogleTranslate constructor.
@@ -119,16 +119,16 @@ class GoogleTranslate
     public function translate()
     {
         if (count($this->textTranslations) > 0) {
-            $this->textTranslated = $this->client->translateBatch($this->textTranslations, array(
+            $this->textTranslated = $this->client->translateBatch($this->textTranslations, [
                 'target' => $this->targetLanguage,
                 'format' => 'text',
-            ));
+            ]);
         }
         if (count($this->htmlTranslations) > 0) {
-            $this->htmlTranslated = $this->client->translateBatch($this->htmlTranslations, array(
+            $this->htmlTranslated = $this->client->translateBatch($this->htmlTranslations, [
                 'target' => $this->targetLanguage,
                 'format' => 'html',
-            ));
+            ]);
         }
     }
 }

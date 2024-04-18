@@ -69,7 +69,7 @@ class Entry extends Model
         $SQL = SQL::newSelect('entry');
         $SQL->setLimit(0);
         $statement = $DB->query($SQL->get(dsn()), 'exec');
-        $columns = array();
+        $columns = [];
         for ($i = 0; $i < $statement->columnCount(); $i++) {
             $meta = $statement->getColumnMeta($i);
             $columns[] = preg_replace('/entry_/', '', $meta['name']);
@@ -87,7 +87,7 @@ class Entry extends Model
         $DB = DB::singleton(dsn());
         $SQL = SQL::newSelect('entry');
         $SQL->addWhereOpr('entry_id', $id);
-        if ( $entry = $DB->query($SQL->get(dsn()), 'row') ) {
+        if ($entry = $DB->query($SQL->get(dsn()), 'row')) {
             $self = new self($entry);
             $self->id = $id;
             return $self;
@@ -121,7 +121,7 @@ class Entry extends Model
      */
     public function load($item)
     {
-        foreach ( $item as $key => $value ) {
+        foreach ($item as $key => $value) {
             $key = preg_replace('/entry_/', '', $key);
             $this->{$key} = $value;
         }
@@ -145,9 +145,9 @@ class Entry extends Model
     {
         $DB = DB::singleton(dsn());
 
-        if ( $this->update ) {
+        if ($this->update) {
             $SQL = SQL::newUpdate('entry');
-            foreach ( $this->columns as $column ) {
+            foreach ($this->columns as $column) {
                 $SQL->addUpdate('entry_' . $column, $this->{$column});
             }
             $SQL->addWhereOpr('entry_id', $this->id);
@@ -155,7 +155,7 @@ class Entry extends Model
             $DB->query($SQL->get(dsn()), 'exec');
         } else {
             $SQL = SQL::newInsert('entry');
-            foreach ( $this->columns as $column ) {
+            foreach ($this->columns as $column) {
                 $SQL->addInsert('entry_' . $column, $this->{$column});
             }
             $DB->query($SQL->get(dsn()), 'exec');
@@ -184,7 +184,7 @@ class Entry extends Model
         $DB = DB::singleton(dsn());
         $SQL = SQL::newSelect('entry');
 
-        switch ( $type ) {
+        switch ($type) {
             case self::SORT_ENTRY:
                 $SQL->setSelect('entry_sort');
                 $SQL->addWhereOpr('entry_blog_id', $this->blog_id);
