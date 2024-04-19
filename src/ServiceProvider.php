@@ -33,7 +33,7 @@ class ServiceProvider extends ACMS_App
     public $module = false;
 
     /**
-     * @var bool|string
+     * @var false|string
      */
     public $menu = 'google_translate';
 
@@ -78,12 +78,12 @@ class ServiceProvider extends ACMS_App
         $hook->attach('google_translate.hook', new Hook());
 
         $inject = InjectTemplate::singleton();
-        $inject->add('admin-entry-editor-top', PLUGIN_DIR . 'GoogleTranslate/template/entry-lang-check.html');
-        $inject->add('admin-category-field', PLUGIN_DIR . 'GoogleTranslate/template/category-config.html');
+        $inject->add('admin-entry-editor-top', PLUGIN_DIR . 'GoogleTranslate/template/admin/entry/editor/top.html');
+        $inject->add('admin-category-field', PLUGIN_DIR . 'GoogleTranslate/template/admin/category/field.html');
 
-        if (ADMIN === 'app_google_translate') {
-            $inject->add('admin-main', PLUGIN_DIR . 'GoogleTranslate/template/config.html');
-            $inject->add('admin-topicpath', PLUGIN_DIR . 'GoogleTranslate/template/topicpath.html');
+        if (ADMIN === 'app_' . $this->menu) {
+            $inject->add('admin-main', PLUGIN_DIR . 'GoogleTranslate/template/admin/main.html');
+            $inject->add('admin-topicpath', PLUGIN_DIR . 'GoogleTranslate/template/admin/topicpath.html');
         }
         /**
          * ToDo: Spoke連携
