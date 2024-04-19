@@ -7,6 +7,8 @@ use SQL;
 use App;
 use ACMS_POST_Entry_Duplicate;
 use ACMS_RAM;
+use Acms\Services\Facades\Common;
+use Acms\Services\Facades\Logger;
 
 class CreateEntry extends ACMS_POST_Entry_Duplicate
 {
@@ -20,8 +22,8 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
      */
     public function post()
     {
-        $targetBid = $this->Post->get('target_bid');
-        $originalEid = $this->Post->get('original_eid');
+        $targetBid = (int)$this->Post->get('target_bid');
+        $originalEid = (int)$this->Post->get('original_eid');
         $doGoogleTranslate = $this->Post->get('do_google_translate') === '1';
         $this->Post->set('backend', true);
         $this->engine = App::make('google_translate.engine');
@@ -30,6 +32,7 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
         try {
             $this->customValidate($targetBid, $originalEid);
         } catch (\Exception $e) {
+            Logger::notice('【GoogleTranslate plugin】エントリーの複製または翻訳に失敗しました。', Common::exceptionArray($e));
             $this->addError($e->getMessage());
             return $this->Post;
         }
@@ -47,7 +50,14 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
             if ($doGoogleTranslate) {
                 $this->googleTranslate($targetBid, $newEid);
             }
+            Logger::info('【GoogleTranslate plugin】エントリーの複製または翻訳に成功しました。', [
+                'originalEntryId' => $originalEid,
+                'createdEntryId' => $newEid,
+                'blogId' => $targetBid,
+                'translate' => $doGoogleTranslate ? 'yes' : 'no',
+            ]);
         } catch (\Exception $e) {
+            Logger::notice('【GoogleTranslate plugin】エントリーの複製または翻訳に失敗しました。', Common::exceptionArray($e));
             $this->addError($e->getMessage());
         }
         return $this->Post;
@@ -242,7 +252,7 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
     protected function customValidate($targetBid, $originalEid)
     {
         if (empty($targetBid)) {
-            throw new \RuntimeException('対応ブログがしていされていません');
+            throw new \RuntimeException('対応ブログが指定されていません');
         }
         if (empty($originalEid)) {
             throw new \RuntimeException('エントリーが指定されていません。');
