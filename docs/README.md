@@ -28,20 +28,22 @@ APIキーは必ず、**キーの制限** をかけるようにしてください
 
 サイトを多言語化するにあたり、各言語をブログを切って設計します。
 
-例:  
-日本語サイト  
-　　 ┗ 日本語ブログ  
-　　 ┗ 英語サイト  
-　　　　 ┗英語ブログ  
+例:
+```
+日本語サイト
+  ┗ 日本語ブログ
+  ┗ 英語サイト
+    ┗英語ブログ
+```
 
 ## インストール
 
 1. [Google Translate for a-blog cms](https://github.com/appleple/acms-google-translate/raw/master/build/GoogleTranslate.zip) から
 zipファイルをダウンロードし、解凍したディレクトリ（GoogleTranslate）を **extension/plugins/** に設置する。
 
-1. 管理者で a-blog cms にログインし、 拡張アプリに移動し、「Google Translate」をインストールします。
+1. 管理者で a-blog cms にログインし、 拡張アプリに移動し、「GoogleTranslate」をインストールします。
 
-1. 多言語管理するブログ全てで、「Google Translate」拡張アプリを有効にします。
+1. 多言語管理するブログ全てで、「GoogleTranslate」拡張アプリを有効にします。
 
 ## 設定
 
@@ -136,4 +138,3 @@ or
 <body>
 ...
 ```
-
