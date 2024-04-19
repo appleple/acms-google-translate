@@ -2,6 +2,7 @@
 
 namespace Acms\Plugins\GoogleTranslate\Contracts;
 
+#[\AllowDynamicProperties]
 abstract class Model
 {
     /**
@@ -19,7 +20,7 @@ abstract class Model
      */
     public function __construct()
     {
-        $this->columns = $this->setColumns();
+        $this->columns = $this->getColumns();
         foreach ($this->columns as $column) {
             $this->{$column} = null;
         }
@@ -36,11 +37,11 @@ abstract class Model
     }
 
     /**
-     * Set columns
+     * Get columns
      *
-     * @return array
+     * @return string[]
      */
-    abstract public function setColumns();
+    abstract protected function getColumns();
 
     /**
      * Initialize model
@@ -82,7 +83,7 @@ abstract class Model
         $getter = 'get' . ucfirst($key);
 
         if (method_exists($this, $getter)) {
-            return call_user_func($getter);
+            return call_user_func([$this, $getter]);
         } elseif (property_exists($this, $key)) {
             return $this->{$key};
         }
@@ -97,10 +98,10 @@ abstract class Model
      */
     public function __set($key, $value)
     {
-        $setter = 'get' . ucfirst($key);
+        $setter = 'set' . ucfirst($key);
 
         if (method_exists($this, $setter)) {
-            call_user_func($setter, $value);
+            return call_user_func([$this, $setter], $value);
         }
         $this->{$key} = $value;
     }

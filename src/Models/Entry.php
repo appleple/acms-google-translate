@@ -11,6 +11,10 @@ use Entry as EntryHelper;
 
 class Entry extends Model
 {
+    private const SORT_ENTRY    = 1;
+    private const SORT_USER     = 2;
+    private const SORT_CATEGORY = 3;
+
     /**
      * @var \Field
      */
@@ -59,12 +63,15 @@ class Entry extends Model
     }
 
     /**
-     * Set columns
+     * Get columns
      *
-     * @return array
+     * @return string[]
      */
-    public function setColumns()
+    protected function getColumns()
     {
+        if (count($this->columns) > 0) {
+            return $this->columns;
+        }
         $DB = DB::singleton(dsn());
         $SQL = SQL::newSelect('entry');
         $SQL->setLimit(0);
