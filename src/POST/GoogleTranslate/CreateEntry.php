@@ -162,10 +162,10 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
      */
     protected function getTextUnitFormat($tag)
     {
-        if (in_array($tag, ['pre'])) {
+        if (in_array($tag, ['pre'], true)) {
             return 'none';
         }
-        if (in_array($tag, ['none', 'wysiwyg', 'p'])) {
+        if (in_array($tag, ['none', 'wysiwyg', 'p'], true)) {
             return 'html';
         }
         return 'text';

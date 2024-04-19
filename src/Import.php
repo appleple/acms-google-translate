@@ -4,7 +4,6 @@ namespace Acms\Plugins\GoogleTranslate;
 
 use Acms\Plugins\GoogleTranslate\Models\Entry as EntryModel;
 use Acms\Plugins\GoogleTranslate\Exceptions\NotFoundException;
-use App;
 use SQL;
 use DB;
 

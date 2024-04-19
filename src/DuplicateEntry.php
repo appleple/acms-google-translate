@@ -444,7 +444,7 @@ class DuplicateEntry
                     'entry_rev_user_id',
                     'entry_rev_datetime',
                     'entry_current_rev_id'
-                ])
+                ], true)
             ) {
                 $SQL->addInsert($fd, $val);
             }
@@ -462,7 +462,7 @@ class DuplicateEntry
                     'entry_rev_id',
                     'entry_rev_user_id',
                     'entry_rev_datetime'
-                ])
+                ], true)
             ) {
                 $SQL->addInsert($fd, $val);
             }
@@ -697,7 +697,7 @@ class DuplicateEntry
     protected function conversionEntryId(&$Field, $fd, $targetBid)
     {
         $translationEidFields = $this->config->getArray('translationEidFieldName');
-        if (in_array($fd, $translationEidFields)) {
+        if (in_array($fd, $translationEidFields, true)) {
             $eidValue = $Field->getArray($fd);
 
             $Field->delete($fd);
@@ -725,7 +725,7 @@ class DuplicateEntry
     protected function conversionBlogId(&$Field, $fd, $targetBid)
     {
         $translationBidFields = $this->config->getArray('translationBidFieldName');
-        if (in_array($fd, $translationBidFields)) {
+        if (in_array($fd, $translationBidFields, true)) {
             $bidValue = $Field->getArray($fd);
             $Field->delete($fd);
 
@@ -761,7 +761,7 @@ class DuplicateEntry
     {
         $engine = App::make('google_translate.engine');
         $translationCidFields = $this->config->getArray('translationCidFieldName');
-        if (in_array($fd, $translationCidFields)) {
+        if (in_array($fd, $translationCidFields, true)) {
             $cidValue = $Field->getArray($fd);
             $Field->delete($fd);
             foreach ($cidValue as $cid) {

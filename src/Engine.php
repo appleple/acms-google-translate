@@ -7,12 +7,8 @@ use SQL;
 use ACMS_RAM;
 use ACMS_Filter;
 use Field;
-use Entry;
-use Storage;
 use Common;
 use Config;
-use ACMS_Hook;
-use ACMS_POST_Category;
 
 class Engine
 {
@@ -331,7 +327,7 @@ class Engine
         $fields = loadEntryField($eid);
         foreach ($fields->listFields() as $key) {
             $values = $fields->getArray($key);
-            if (!in_array($key, $targetField)) {
+            if (!in_array($key, $targetField, true)) {
                 continue;
             }
             if (empty($values)) {
@@ -357,7 +353,7 @@ class Engine
         $units = loadColumn($eid);
         foreach ($units as $unit) {
             $type = detectUnitTypeSpecifier($unit['type']);
-            if (!in_array($type, ['text', 'table', 'media', 'image', 'file'])) {
+            if (!in_array($type, ['text', 'table', 'media', 'image', 'file'], true)) {
                 continue;
             }
             $item[] = $unit;
