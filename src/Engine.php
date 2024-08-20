@@ -210,7 +210,7 @@ class Engine
         $sql->addWhereOpr('relation_bid', $targetBid);
         $lang = DB::query($sql->get(dsn()), 'one');
         $categoryField = loadCategoryField($cid);
-        if ($exceptionCode = $categoryField->get("google_translate_relation_category_${lang}_code", false)) {
+        if ($exceptionCode = $categoryField->get("google_translate_relation_category_{$lang}_code", false)) {
             $code = $exceptionCode;
         }
 
