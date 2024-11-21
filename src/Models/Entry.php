@@ -156,8 +156,7 @@ class Entry extends Model
                 if ($type === 'custom') {
                     $unit->setField6(acmsUnserialize($unit->getField6()));
                 }
-                $newId = $unit->generateNewIdTrait();
-                $unit->setId($newId);
+                $unit->setTempId(uniqueString());
             }
         }
     }
