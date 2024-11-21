@@ -166,7 +166,7 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
     protected function getTranslationUnits(&$units, $googleTranslate)
     {
         foreach ($units as $i => & $unit) {
-            if(is_array($unit)) {
+            if (is_array($unit)) {
                 $type = detectUnitTypeSpecifier($unit['type']);
                 switch ($type) {
                     case 'text':
