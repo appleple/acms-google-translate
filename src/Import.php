@@ -98,7 +98,6 @@ class Import
             foreach ($entry->units as $new) {
                 $clid = $new->clid;
                 foreach ($model->units as $i => $current) {
-                    var_dump($current->getId(), $clid);
                     if (is_array($current) && $current['clid'] === $clid) {
                         $type = detectUnitTypeSpecifier($new->type);
                         switch ($type) {
@@ -121,22 +120,21 @@ class Import
                         $model->units[$i] = $current;
                         break;
                     } elseif (is_object($current) && $current->getId() === $clid) {
-                        var_dump($new->text);
                         $type = detectUnitTypeSpecifier($new->type);
                         switch ($type) {
                             case 'text':
                                 $current->setField1($new->text);
                                 break;
                             case 'table':
-                                $current->setTable($new->table);
+                                $current->setField1($new->table);
                                 break;
                             case 'media':
                             case 'image':
-                                $current->setCaption($new->caption);
-                                $current->setAlt($new->alt);
+                                $current->setField1($new->caption);
+                                $current->setField4($new->alt);
                                 break;
                             case 'file':
-                                $current->setCaption($new->caption);
+                                $current->setField1($new->caption);
                                 break;
                         }
                         $newId = $current->generateNewIdTrait();
@@ -147,8 +145,6 @@ class Import
                 }
             }
         }
-
-        // var_dump($model);
 
         // field
         if (property_exists($entry, 'fields') && is_array($entry->fields)) {
