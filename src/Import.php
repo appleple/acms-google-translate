@@ -98,7 +98,8 @@ class Import
             foreach ($entry->units as $new) {
                 $clid = $new->clid;
                 foreach ($model->units as $i => $current) {
-                    if ($current['clid'] === $clid) {
+                    var_dump($current->getId(), $clid);
+                    if (is_array($current) && $current['clid'] === $clid) {
                         $type = detectUnitTypeSpecifier($new->type);
                         switch ($type) {
                             case 'text':
@@ -119,10 +120,35 @@ class Import
                         $current['id'] = uniqueString();
                         $model->units[$i] = $current;
                         break;
+                    } elseif (is_object($current) && $current->getId() === $clid) {
+                        var_dump($new->text);
+                        $type = detectUnitTypeSpecifier($new->type);
+                        switch ($type) {
+                            case 'text':
+                                $current->setField1($new->text);
+                                break;
+                            case 'table':
+                                $current->setTable($new->table);
+                                break;
+                            case 'media':
+                            case 'image':
+                                $current->setCaption($new->caption);
+                                $current->setAlt($new->alt);
+                                break;
+                            case 'file':
+                                $current->setCaption($new->caption);
+                                break;
+                        }
+                        $newId = $current->generateNewIdTrait();
+                        $current->setId($newId);
+                        $model->units[$i] = $current;
+                        break;
                     }
                 }
             }
         }
+
+        // var_dump($model);
 
         // field
         if (property_exists($entry, 'fields') && is_array($entry->fields)) {
