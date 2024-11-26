@@ -129,6 +129,9 @@ class Import
                                 $current->setField1($new->table);
                                 break;
                             case 'media':
+                                $current->setField2($new->caption);
+                                $current->setField3($new->alt);
+                                break;
                             case 'image':
                                 $current->setField1($new->caption);
                                 $current->setField4($new->alt);
@@ -137,8 +140,7 @@ class Import
                                 $current->setField1($new->caption);
                                 break;
                         }
-                        $newId = $current->generateNewIdTrait();
-                        $current->setId($newId);
+                        $current->setTempId(uniqueString());
                         $model->units[$i] = $current;
                         break;
                     }

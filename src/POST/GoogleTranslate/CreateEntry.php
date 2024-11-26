@@ -132,29 +132,6 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
                         $googleTranslate->addText('unit_caption_' . $i, $unit['caption']);
                         break;
                 }
-            } elseif (is_object($unit)) {
-                $type = detectUnitTypeSpecifier($unit->getType());
-                switch ($type) {
-                    case 'text':
-                        $tagType = $this->getTextUnitFormat($unit->getTag());
-                        if ($tagType === 'html') {
-                            $googleTranslate->addHtml('unit_text_' . $i, $this->newLineEscape($unit->getText()));
-                        } elseif ($tagType === 'text') {
-                            $googleTranslate->addText('unit_text_' . $i, $unit->getText());
-                        }
-                        break;
-                    case 'table':
-                        $googleTranslate->addHtml('unit_table_' . $i, $unit->getTable());
-                        break;
-                    case 'media':
-                    case 'image':
-                        $googleTranslate->addText('unit_caption_' . $i, $unit->getCaption());
-                        $googleTranslate->addText('unit_alt_' . $i, $unit->getAlt());
-                        break;
-                    case 'file':
-                        $googleTranslate->addText('unit_caption_' . $i, $unit->getCaption());
-                        break;
-                }
             }
         }
     }
@@ -187,29 +164,6 @@ class CreateEntry extends ACMS_POST_Entry_Duplicate
                         break;
                     case 'file':
                         $unit['caption'] = $googleTranslate->getText('unit_caption_' . $i);
-                        break;
-                }
-            } elseif (is_object($unit)) {
-                $type = detectUnitTypeSpecifier($unit->getType());
-                switch ($type) {
-                    case 'text':
-                        $tagType = $this->getTextUnitFormat($unit->getTag());
-                        if ($tagType === 'html') {
-                            $unit->setText($this->newLineUnEscape($googleTranslate->getHtml('unit_text_' . $i)));
-                        } elseif ($tagType === 'text') {
-                            $unit->setText($googleTranslate->getText('unit_text_' . $i));
-                        }
-                        break;
-                    case 'table':
-                        $unit->setTable($googleTranslate->getHtml('unit_table_' . $i));
-                        break;
-                    case 'media':
-                    case 'image':
-                        $unit->setCaption($googleTranslate->getText('unit_caption_' . $i));
-                        $unit->setAlt($googleTranslate->getText('unit_alt_' . $i));
-                        break;
-                    case 'file':
-                        $unit->setCaption($googleTranslate->getText('unit_caption_' . $i));
                         break;
                 }
             }
