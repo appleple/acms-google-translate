@@ -98,7 +98,7 @@ class Import
             foreach ($entry->units as $new) {
                 $clid = $new->clid;
                 foreach ($model->units as $i => $current) {
-                    if ($current['clid'] === $clid) {
+                    if (is_array($current) && $current['clid'] === $clid) {
                         $type = detectUnitTypeSpecifier($new->type);
                         switch ($type) {
                             case 'text':
@@ -117,6 +117,30 @@ class Import
                                 break;
                         }
                         $current['id'] = uniqueString();
+                        $model->units[$i] = $current;
+                        break;
+                    } elseif (is_object($current) && $current->getId() === $clid) {
+                        $type = detectUnitTypeSpecifier($new->type);
+                        switch ($type) {
+                            case 'text':
+                                $current->setField1($new->text);
+                                break;
+                            case 'table':
+                                $current->setField1($new->table);
+                                break;
+                            case 'media':
+                                $current->setField2($new->caption);
+                                $current->setField3($new->alt);
+                                break;
+                            case 'image':
+                                $current->setField1($new->caption);
+                                $current->setField4($new->alt);
+                                break;
+                            case 'file':
+                                $current->setField1($new->caption);
+                                break;
+                        }
+                        $current->setTempId(uniqueString());
                         $model->units[$i] = $current;
                         break;
                     }

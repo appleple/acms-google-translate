@@ -144,7 +144,7 @@ class Engine
         ];
         if ($detail) {
             $item['fields'] = $this->buildFieldData($eid, $targetField);
-            $item['units'] = $this->buildUnitDate($eid);
+            $item['units'] = $this->buildUnitData($eid);
         }
         return $item;
     }
@@ -347,7 +347,7 @@ class Engine
      * @param int $eid
      * @return array
      */
-    protected function buildUnitDate($eid)
+    protected function buildUnitData($eid)
     {
         $item = [];
         $units = loadColumn($eid);

@@ -3,11 +3,12 @@
 namespace Acms\Plugins\GoogleTranslate\Models;
 
 use Acms\Plugins\GoogleTranslate\Contracts\Model;
+use Acms\Services\Facades\Application;
 use DB;
 use SQL;
 use Field;
 use Common;
-use Entry as EntryHelper;
+use Acms\Services\Entry\Helper as EntryHelper;
 
 class Entry extends Model
 {
@@ -132,14 +133,31 @@ class Entry extends Model
             $key = preg_replace('/entry_/', '', $key);
             $this->{$key} = $value;
         }
+
         $this->fields = loadEntryField($this->id);
-        $this->units = loadColumn($this->id);
-        foreach ($this->units as & $unit) {
-            $type = detectUnitTypeSpecifier($unit['type']);
-            if ($type === 'custom') {
-                $unit['field'] = acmsUnserialize($unit['field']);
+
+        // ablogcms v3.1.23 からリファクタリングによりメソッドがなくなっている問題の解決
+        if (method_exists(EntryHelper::class, 'saveColumn')) {
+            $this->units = loadColumn($this->id);
+            foreach ($this->units as & $unit) {
+                $type = detectUnitTypeSpecifier($unit['type']);
+                if ($type === 'custom') {
+                    $unit['field'] = acmsUnserialize($unit['field']);
+                }
+                $unit['id'] = uniqueString();
             }
-            $unit['id'] = uniqueString();
+        } else {
+            /** @var \Acms\Services\Unit\Repository $unitService */
+            $unitService = Application::make('unit-repository');
+            $this->units = $unitService->loadUnits($this->id);
+
+            foreach ($this->units as & $unit) {
+                $type = detectUnitTypeSpecifier($unit->getType());
+                if ($type === 'custom') {
+                    $unit->setField6(acmsUnserialize($unit->getField6()));
+                }
+                $unit->setTempId(uniqueString());
+            }
         }
     }
 
@@ -168,7 +186,16 @@ class Entry extends Model
             $DB->query($SQL->get(dsn()), 'exec');
         }
 
-        EntryHelper::saveColumn($this->units, $this->id, $this->blog_id);
+        // ablogcms v3.1.23 からリファクタリングによりメソッドがなくなっている問題の解決
+        if (method_exists(EntryHelper::class, 'saveColumn')) {
+            $entryHelper = new EntryHelper();
+            $entryHelper->saveColumn($this->units, $this->id, $this->blog_id);
+        } else {
+            $unitRepository = Application::make('unit-repository');
+            assert($unitRepository instanceof \Acms\Services\Unit\Repository);
+            $unitRepository->saveUnits($this->units, $this->id, $this->blog_id);
+        }
+
         Common::saveField('eid', $this->id, $this->fields);
         Common::saveFulltext('eid', $this->id, Common::loadEntryFulltext($this->id));
     }
