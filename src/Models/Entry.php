@@ -153,9 +153,6 @@ class Entry extends Model
 
             foreach ($this->units as & $unit) {
                 $type = detectUnitTypeSpecifier($unit->getType());
-                if ($type === 'custom') {
-                    $unit->setField6(acmsUnserialize($unit->getField6()));
-                }
                 $unit->setTempId(uniqueString());
             }
         }
