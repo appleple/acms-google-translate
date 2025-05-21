@@ -83,7 +83,12 @@ class DuplicateEntry
                         break;
                     case 'custom':
                         $old = $row['column_field_6'];
-                        $Field = acmsUnserialize($old);
+                        $Field = null;
+                        if (function_exists('acmsDangerUnserialize')) {
+                            $Field = acmsDangerUnserialize($old);
+                        } else {
+                            $Field = acmsUnserialize($old);
+                        }
                         $this->fieldDupe($Field, $targetBid);
                         $row['column_field_6'] = acmsSerialize($Field);
                         break;
