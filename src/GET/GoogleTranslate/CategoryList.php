@@ -13,6 +13,7 @@ class CategoryList extends ACMS_GET
 {
     public function get()
     {
+        return '';
         if (empty(CID)) {
             return '';
         }

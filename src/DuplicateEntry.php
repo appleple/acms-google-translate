@@ -2,19 +2,18 @@
 
 namespace Acms\Plugins\GoogleTranslate;
 
-use App;
-use DB;
+use Acms\Services\Facades\Application;
+use Acms\Services\Facades\Common;
+use Acms\Services\Facades\Config;
+use Acms\Services\Facades\Entry;
+use Acms\Services\Facades\Database as DB;
 use SQL;
 use ACMS_RAM;
-use Common;
-use Config;
-use Entry;
-use Storage;
-use Field;
-use ACMS_Hook;
 
 class DuplicateEntry
 {
+    use \Acms\Traits\Common\AssetsTrait;
+
     protected $config;
 
     public function __construct()
@@ -29,152 +28,79 @@ class DuplicateEntry
         if (empty($targetBid)) {
             $targetBid = $bid;
         }
-
-        //--------
-        // column
-        $map = [];
-        $SQL = SQL::newSelect('column');
-        $SQL->addWhereOpr('column_entry_id', $eid);
-        $SQL->addWhereOpr('column_blog_id', $bid);
-        $q  = $SQL->get(dsn());
-        if ($DB->query($q, 'fetch') && ($row = $DB->fetch($q))) {
-            do {
-                $type = detectUnitTypeSpecifier($row['column_type']);
-                switch ($type) {
-                    case 'image':
-                        $oldAry = explodeUnitData($row['column_field_2']);
-                        $newAry = [];
-                        foreach ($oldAry as $old) {
-                            $info   = pathinfo($old);
-                            $dirname = empty($info['dirname']) ? '' : $info['dirname'] . '/';
-                            $ext    = empty($info['extension']) ? '' : '.' . $info['extension'];
-                            $newOld = $dirname . uniqueString() . $ext;
-                            $path   = ARCHIVES_DIR . $old;
-                            $large  = otherSizeImagePath($path, 'large');
-                            $tiny   = otherSizeImagePath($path, 'tiny');
-                            $square = otherSizeImagePath($path, 'square');
-                            $newPath    = ARCHIVES_DIR . $newOld;
-                            $newLarge   = otherSizeImagePath($newPath, 'large');
-                            $newTiny    = otherSizeImagePath($newPath, 'tiny');
-                            $newSquare  = otherSizeImagePath($newPath, 'square');
-                            copyFile($path, $newPath);
-                            copyFile($large, $newLarge);
-                            copyFile($tiny, $newTiny);
-                            copyFile($square, $newSquare);
-                            $newAry[]   = $newOld;
-                        }
-                        $row['column_field_2']  = implodeUnitData($newAry);
-                        break;
-                    case 'file':
-                        $oldAry = explodeUnitData($row['column_field_2']);
-                        $newAry = [];
-                        foreach ($oldAry as $old) {
-                            $info   = pathinfo($old);
-                            $dirname = empty($info['dirname']) ? '' : $info['dirname'] . '/';
-                            $ext    = empty($info['extension']) ? '' : '.' . $info['extension'];
-                            $newOld = $dirname . uniqueString() . $ext;
-                            $path   = ARCHIVES_DIR . $old;
-                            $newPath    = ARCHIVES_DIR . $newOld;
-                            copyFile($path, $newPath);
-
-                            $newAry[]   = $newOld;
-                        }
-                        $row['column_field_2']  = implodeUnitData($newAry);
-                        break;
-                    case 'custom':
-                        $old = $row['column_field_6'];
-                        $Field = null;
-                        if (function_exists('acmsDangerUnserialize')) {
-                            $Field = acmsDangerUnserialize($old);
-                        } else {
-                            $Field = acmsUnserialize($old);
-                        }
-                        $this->fieldDupe($Field, $targetBid);
-                        $row['column_field_6'] = acmsSerialize($Field);
-                        break;
-                    default:
-                        break;
-                }
-                $newClid = $DB->query(SQL::nextval('column_id', dsn()), 'seq');
-                $map[intval($row['column_id'])] = $newClid;
-                $row['column_id']       = $newClid;
-                $row['column_entry_id'] = $newEid;
-                $row['column_blog_id'] = $targetBid;
-
-                $SQL    = SQL::newInsert('column');
-                foreach ($row as $fd => $val) {
-                    $SQL->addInsert($fd, $val);
-                }
-                $DB->query($SQL->get(dsn()), 'exec');
-            } while ($row = $DB->fetch($q));
+        $approval = ACMS_RAM::entryApproval($eid);
+        $sourceRvid = null;
+        if ($approval === 'pre_approval') {
+            $sourceRvid = 1;
         }
 
         //-------
+        // unit
+        $unitRepository = Application::make('unit-repository');
+        $collection = $unitRepository->loadUnits(
+            eid: $eid,
+            rvid: $sourceRvid,
+            options: ['setPrimaryImage' => true]
+        );
+        $newCollection = clone $collection;
+        $newCollection->walk(function (\Acms\Services\Unit\Contracts\Model $unit) use ($newEid, $targetBid) {
+            if (is_null($unit->getId())) {
+                throw new \RuntimeException(
+                    'Unit ID must not be null. Unexpected state: unit data already exists in database.'
+                );
+            }
+            $unit->setEntryId($newEid);
+            $unit->setBlogId($targetBid);
+            $unit->handleDuplicate();
+            $unit->insertDataTrait($unit, false);
+        });
+
+        //-------
         // entry
+        $entryRepository = Application::make('entry.repository');
+        assert($entryRepository instanceof \Acms\Services\Entry\EntryRepository);
         $SQL    = SQL::newSelect('entry');
         $SQL->addWhereOpr('entry_id', $eid);
         $SQL->addWhereOpr('entry_blog_id', $bid);
         $row = $DB->query($SQL->get(dsn()), 'row');
-        $title = $row['entry_title'];
-        $code = $row['entry_code'];
-
-        $uid    = intval($row['entry_user_id']);
+        $title  = $row['entry_title'] . config('entry_title_duplicate_suffix');
+        $code   = ('on' == config('entry_code_title')) ?
+            stripWhitespace($title) :
+            config('entry_code_prefix') . $newEid;
+        if (!!config('entry_code_extension') and !strpos($code, '.')) {
+            $code .= ('.' . config('entry_code_extension'));
+        }
+        $uid = intval($row['entry_user_id']);
         if (!($cid = intval($row['entry_category_id']))) {
             $cid = null;
         };
 
-        //------
         // sort
-        $SQL    = SQL::newSelect('entry');
-        $SQL->setSelect('entry_sort');
-        $SQL->addWhereOpr('entry_blog_id', $bid);
-        $SQL->setOrder('entry_sort', 'DESC');
-        $SQL->setLimit(1);
-        $esort  = intval($DB->query($SQL->get(dsn()), 'one')) + 1;
+        $esort = $entryRepository->nextSort($targetBid);
+        $usort = $entryRepository->nextUserSort($uid, $targetBid);
+        $csort = $entryRepository->nextCategorySort($cid, $targetBid);
 
-        $SQL    = SQL::newSelect('entry');
-        $SQL->setSelect('entry_user_sort');
-        $SQL->addWhereOpr('entry_user_id', $uid);
-        $SQL->addWhereOpr('entry_blog_id', $bid);
-        $SQL->setOrder('entry_user_sort', 'DESC');
-        $SQL->setLimit(1);
-        $usort  = intval($DB->query($SQL->get(dsn()), 'one')) + 1;
-
-        $SQL    = SQL::newSelect('entry');
-        $SQL->setSelect('entry_category_sort');
-        $SQL->addWhereOpr('entry_category_id', $cid);
-        $SQL->addWhereOpr('entry_blog_id', $bid);
-        $SQL->setOrder('entry_category_sort', 'DESC');
-        $SQL->setLimit(1);
-        $csort  = intval($DB->query($SQL->get(dsn()), 'one')) + 1;
-
-        $row['entry_id']        = $newEid;
-        $row['entry_status']    = 'close';
-        $row['entry_title']     = $title;
-        $row['entry_code']      = $code;
-        if ($this->config->get('google_translate_app_update_datetime_as_duplicate_entry') === 'on') {
+        $row['entry_id'] = $newEid;
+        $row['entry_status'] = 'close';
+        $row['entry_approval'] = 'none';
+        $row['entry_title'] = $title;
+        $row['entry_code'] = $code;
+        if (config('update_datetime_as_duplicate_entry') !== 'off') {
             $row['entry_datetime'] = date('Y-m-d H:i:s', REQUEST_TIME);
         }
-        $row['entry_posted_datetime']   = date('Y-m-d H:i:s', REQUEST_TIME);
-        $row['entry_updated_datetime']  = date('Y-m-d H:i:s', REQUEST_TIME);
-        $row['entry_hash']              = md5(SYSTEM_GENERATED_DATETIME . date('Y-m-d H:i:s', REQUEST_TIME));
-        if (
-            isset($row['entry_primary_image']) &&
-            isset($map[$row['entry_primary_image']]) &&
-            !empty($map[$row['entry_primary_image']])
-        ) {
-            $row['entry_primary_image'] = $map[$row['entry_primary_image']];
-        } else {
-            $row['entry_primary_image'] = null;
-        }
-        $row['entry_sort']              = $esort;
-        $row['entry_user_sort']         = $usort;
-        $row['entry_category_sort']     = $csort;
-        $row['entry_user_id']           = SUID;
-        $row['entry_blog_id']           = $targetBid;
-        $SQL    = SQL::newInsert('entry');
+        $row['entry_posted_datetime'] = date('Y-m-d H:i:s', REQUEST_TIME);
+        $row['entry_updated_datetime'] = date('Y-m-d H:i:s', REQUEST_TIME);
+        $row['entry_hash'] = md5(SYSTEM_GENERATED_DATETIME . date('Y-m-d H:i:s', REQUEST_TIME));
+        $primaryImageUnit = $collection->getPrimaryImageUnit();
+        $row['entry_primary_image'] = $primaryImageUnit ? $primaryImageUnit->getId() : null;
+        $row['entry_sort'] = $esort;
+        $row['entry_user_sort'] = $usort;
+        $row['entry_category_sort'] = $csort;
+        $row['entry_user_id'] = SUID;
+        $row['entry_blog_id'] = $targetBid;
+        $SQL = SQL::newInsert('entry');
         foreach ($row as $fd => $val) {
-            if ($fd == 'entry_current_rev_id') {
+            if ($fd === 'entry_current_rev_id' || $fd === 'entry_reserve_rev_id') {
                 continue;
             }
             $SQL->addInsert($fd, $val);
@@ -183,20 +109,22 @@ class DuplicateEntry
 
         //-----
         // tag
-        $SQL    = SQL::newSelect('tag');
+        $SQL = SQL::newSelect('tag');
         $SQL->addWhereOpr('tag_entry_id', $eid);
         $SQL->addWhereOpr('tag_blog_id', $bid);
-        $q  = $SQL->get(dsn());
-        if ($DB->query($q, 'fetch') && ($row = $DB->fetch($q))) {
+        $q = $SQL->get(dsn());
+        $statement = $DB->query($q, 'exec');
+
+        if ($statement && ($row = $DB->next($statement))) {
+            $insert = SQL::newBulkInsert('tag');
             do {
                 $row['tag_entry_id'] = $newEid;
-                $rpw['tag_blog_id'] = $targetBid;
-                $Insert = SQL::newInsert('tag');
-                foreach ($row as $fd => $val) {
-                    $Insert->addInsert($fd, $val);
-                }
-                $DB->query($Insert->get(dsn()), 'exec');
-            } while ($row = $DB->fetch($q));
+                $row['tag_blog_id'] = $targetBid;
+                $insert->addInsert($row);
+            } while ($row = $DB->next($statement));
+            if ($insert->hasData()) {
+                $DB->query($insert->get(dsn()), 'exec');
+            }
         }
 
         //--------------
@@ -207,7 +135,10 @@ class DuplicateEntry
         //-------
         // field
         $Field  = loadEntryField($eid);
-        $this->fieldDupe($Field, $targetBid);
+        $this->duplicateFieldsTrait($Field);
+        foreach ($Field->listFields() as $fd) {
+            $this->conversionId($Field, $fd, $targetBid);
+        }
         Common::saveField('eid', $newEid, $Field, null, null, '', $targetBid);
         Common::saveFulltext('eid', $newEid, Common::loadEntryFulltext($newEid), $targetBid);
 
@@ -220,222 +151,88 @@ class DuplicateEntry
         $this->geoDuplicate($eid, $newEid, $targetBid);
     }
 
-    public function approvalDupe($eid, $newEid, $bid = null)
+    public function approvalDupe($eid, $newEid, $targetBid)
     {
-        if (empty($bid)) {
-            $bid = ACMS_RAM::entryBlog($eid);
-        }
-        $DB         = DB::singleton(dsn());
-        $approval   = ACMS_RAM::entryApproval($eid);
-        $sourceDir  = ARCHIVES_DIR;
-        $sourceRev  = false;
+        $DB = DB::singleton(dsn());
+        $bid = ACMS_RAM::entryBlog($eid);
+        $approval = ACMS_RAM::entryApproval($eid);
+        $sourceRev = false;
 
         if ($approval === 'pre_approval') {
-            $sourceDir  = REVISON_ARCHIVES_DIR;
-            $sourceRev  = true;
+            $sourceRev = true;
         }
 
-        //--------
-        // column
-        $map    = [];
-        if ($sourceRev) {
-            $SQL    = SQL::newSelect('column_rev');
-            $SQL->addWhereOpr('column_rev_id', 1);
-        } else {
-            $SQL    = SQL::newSelect('column');
-        }
-        $SQL->addWhereOpr('column_entry_id', $eid);
-        $SQL->addWhereOpr('column_blog_id', $bid);
-        $q  = $SQL->get(dsn());
-        if ($DB->query($q, 'fetch') && ($row = $DB->fetch($q))) {
-            do {
-                $type = detectUnitTypeSpecifier($row['column_type']);
-                switch ($type) {
-                    case 'image':
-                        $oldAry = explodeUnitData($row['column_field_2']);
-                        $newAry = [];
-                        foreach ($oldAry as $old) {
-                            $info   = pathinfo($old);
-                            $dirname = empty($info['dirname']) ? '' : $info['dirname'] . '/';
-                            $ext    = empty($info['extension']) ? '' : '.' . $info['extension'];
-                            $newOld = $dirname . uniqueString() . $ext;
-                            $path   = $sourceDir . $old;
-                            $large  = otherSizeImagePath($path, 'large');
-                            $tiny   = otherSizeImagePath($path, 'tiny');
-                            $square = otherSizeImagePath($path, 'square');
-                            $newPath    = REVISON_ARCHIVES_DIR . $newOld;
-                            $newLarge   = otherSizeImagePath($newPath, 'large');
-                            $newTiny    = otherSizeImagePath($newPath, 'tiny');
-                            $newSquare  = otherSizeImagePath($newPath, 'square');
-                            copyFile($path, $newPath);
-                            copyFile($large, $newLarge);
-                            copyFile($tiny, $newTiny);
-                            copyFile($square, $newSquare);
-
-                            $newAry[]   = $newOld;
-                        }
-                        $row['column_field_2']  = implodeUnitData($newAry);
-                        break;
-                    case 'file':
-                        $oldAry = explodeUnitData($row['column_field_2']);
-                        $newAry = [];
-                        foreach ($oldAry as $old) {
-                            $old    = $row['column_field_2'];
-                            $info   = pathinfo($old);
-                            $dirname = empty($info['dirname']) ? '' : $info['dirname'] . '/';
-                            $ext    = empty($info['extension']) ? '' : '.' . $info['extension'];
-                            $newOld = $dirname . uniqueString() . $ext;
-                            $path   = $sourceDir . $old;
-                            $newPath    = REVISON_ARCHIVES_DIR . $newOld;
-                            copyFile($path, $newPath);
-
-                            $newAry[]   = $newOld;
-                        }
-                        $row['column_field_2']  = implodeUnitData($newAry);
-                        break;
-                    case 'custom':
-                        $old = $row['column_field_6'];
-
-                        $Field = acmsUnserialize($old);
-                        foreach ($Field->listFields() as $fd) {
-                            if (!strpos($fd, '@path')) {
-                                continue;
-                            }
-                            $base = substr($fd, 0, (-1 * strlen('@path')));
-                            $set = false;
-                            foreach ($Field->getArray($fd, true) as $i => $path) {
-                                if (!Storage::isFile($sourceDir . $path)) {
-                                    continue;
-                                }
-                                $info       = pathinfo($path);
-                                $dirname    = empty($info['dirname']) ? '' : $info['dirname'] . '/';
-                                Storage::makeDirectory(REVISON_ARCHIVES_DIR . $dirname);
-                                $ext        = empty($info['extension']) ? '' : '.' . $info['extension'];
-                                $newPath    = $dirname . uniqueString() . $ext;
-
-                                $path       = $sourceDir . $path;
-                                $largePath  = otherSizeImagePath($path, 'large');
-                                $tinyPath   = otherSizeImagePath($path, 'tiny');
-                                $squarePath = otherSizeImagePath($path, 'square');
-
-                                $newLargePath   = otherSizeImagePath($newPath, 'large');
-                                $newTinyPath    = otherSizeImagePath($newPath, 'tiny');
-                                $newSquarePath  = otherSizeImagePath($newPath, 'square');
-
-                                Storage::copy($path, REVISON_ARCHIVES_DIR . $newPath);
-                                Storage::copy($largePath, REVISON_ARCHIVES_DIR . $newLargePath);
-                                Storage::copy($tinyPath, REVISON_ARCHIVES_DIR . $newTinyPath);
-                                Storage::copy($squarePath, REVISON_ARCHIVES_DIR . $newSquarePath);
-
-
-                                if (!$set) {
-                                    $Field->delete($fd);
-                                    $Field->delete($base . '@largePath');
-                                    $Field->delete($base . '@tinyPath');
-                                    $Field->delete($base . '@squarePath');
-                                    $set = true;
-                                }
-                                $Field->add($fd, $newPath);
-                                if (Storage::isReadable($largePath)) {
-                                    $Field->add($base . '@largePath', $newLargePath);
-                                }
-                                if (Storage::isReadable($tinyPath)) {
-                                    $Field->add($base . '@tinyPath', $newTinyPath);
-                                }
-                                if (Storage::isReadable($squarePath)) {
-                                    $Field->add($base . '@squarePath', $newSquarePath);
-                                }
-                            }
-                        }
-                        $row['column_field_6'] = acmsSerialize($Field);
-                        break;
-                    default:
-                        break;
-                }
-                $newClid    = $DB->query(SQL::nextval('column_id', dsn()), 'seq');
-                $map[intval($row['column_id'])] = $newClid;
-                $row['column_id']       = $newClid;
-                $row['column_entry_id'] = $newEid;
-
-                $SQL    = SQL::newInsert('column_rev');
-                foreach ($row as $fd => $val) {
-                    $SQL->addInsert($fd, $val);
-                }
-                if (!$sourceRev) {
-                    $SQL->addInsert('column_rev_id', 1);
-                }
-                $DB->query($SQL->get(dsn()), 'exec');
-            } while ($row = $DB->fetch($q));
-        }
+        //------
+        // unit
+        $unitRepository = Application::make('unit-repository');
+        assert($unitRepository instanceof \Acms\Services\Unit\Repository);
+        $rvid = $sourceRev ? 1 : null;
+        $collection = $unitRepository->loadUnits(
+            eid: $eid,
+            rvid: $rvid,
+            options: ['setPrimaryImage' => true]
+        );
+        $newCollection = clone $collection;
+        $newCollection->walk(function (\Acms\Services\Unit\Contracts\Model $unit) use ($newEid, $targetBid) {
+            if (is_null($unit->getId())) {
+                throw new \RuntimeException(
+                    'Unit ID must not be null. Unexpected state: unit data already exists in database.'
+                );
+            }
+            $unit->setEntryId($newEid);
+            $unit->setRevId(1);
+            $unit->setBlogId($targetBid);
+            $unit->handleDuplicate();
+            $unit->insertDataTrait($unit, true);
+        });
 
         //-------
         // entry
+        $entryRepository = Application::make('entry.repository');
+        assert($entryRepository instanceof \Acms\Services\Entry\EntryRepository);
         if ($sourceRev) {
-            $SQL    = SQL::newSelect('entry_rev');
+            $SQL = SQL::newSelect('entry_rev');
             $SQL->addWhereOpr('entry_rev_id', 1);
         } else {
-            $SQL    = SQL::newSelect('entry');
+            $SQL = SQL::newSelect('entry');
         }
         $SQL->addWhereOpr('entry_id', $eid);
         $SQL->addWhereOpr('entry_blog_id', $bid);
         $row = $DB->query($SQL->get(dsn()), 'row');
-        $title = $row['entry_title'];
-        $code = $row['entry_code'];
-
-        $uid    = intval($row['entry_user_id']);
+        $title = $row['entry_title'] . config('entry_title_duplicate_suffix');
+        $code = ('on' == config('entry_code_title')) ? stripWhitespace($title) : config('entry_code_prefix') . $newEid;
+        if (!!config('entry_code_extension') and !strpos($code, '.')) {
+            $code .= ('.' . config('entry_code_extension'));
+        }
+        $uid = intval($row['entry_user_id']);
         if (!($cid = intval($row['entry_category_id']))) {
             $cid = null;
         };
 
         //------
         // sort
-        $SQL    = SQL::newSelect('entry');
-        $SQL->setSelect('entry_sort');
-        $SQL->addWhereOpr('entry_blog_id', $bid);
-        $SQL->setOrder('entry_sort', 'DESC');
-        $SQL->setLimit(1);
-        $esort  = intval($DB->query($SQL->get(dsn()), 'one')) + 1;
+        $esort = $entryRepository->nextSort($bid);
+        $usort = $entryRepository->nextUserSort($uid, $bid);
+        $csort = $entryRepository->nextCategorySort($cid, $bid);
 
-        $SQL    = SQL::newSelect('entry');
-        $SQL->setSelect('entry_user_sort');
-        $SQL->addWhereOpr('entry_user_id', $uid);
-        $SQL->addWhereOpr('entry_blog_id', $bid);
-        $SQL->setOrder('entry_user_sort', 'DESC');
-        $SQL->setLimit(1);
-        $usort  = intval($DB->query($SQL->get(dsn()), 'one')) + 1;
-
-        $SQL    = SQL::newSelect('entry');
-        $SQL->setSelect('entry_category_sort');
-        $SQL->addWhereOpr('entry_category_id', $cid);
-        $SQL->addWhereOpr('entry_blog_id', $bid);
-        $SQL->setOrder('entry_category_sort', 'DESC');
-        $SQL->setLimit(1);
-        $csort  = intval($DB->query($SQL->get(dsn()), 'one')) + 1;
-
-        $row['entry_id']        = $newEid;
-        $row['entry_status']    = 'close';
-        $row['entry_title']     = $title;
-        $row['entry_code']      = $code;
-        if ($this->config->get('google_translate_app_update_datetime_as_duplicate_entry') === 'on') {
+        $row['entry_id'] = $newEid;
+        $row['entry_status'] = 'close';
+        $row['entry_title'] = $title;
+        $row['entry_code'] = $code;
+        if (config('update_datetime_as_duplicate_entry') !== 'off') {
             $row['entry_datetime'] = date('Y-m-d H:i:s', REQUEST_TIME);
         }
-        $row['entry_posted_datetime']   = date('Y-m-d H:i:s', REQUEST_TIME);
-        $row['entry_updated_datetime']  = date('Y-m-d H:i:s', REQUEST_TIME);
-        $row['entry_hash']              = md5(SYSTEM_GENERATED_DATETIME . date('Y-m-d H:i:s', REQUEST_TIME));
-        if (
-            isset($row['entry_primary_image']) &&
-            isset($map[$row['entry_primary_image']]) &&
-            !empty($map[$row['entry_primary_image']])
-        ) {
-            $row['entry_primary_image'] = $map[$row['entry_primary_image']];
-        } else {
-            $row['entry_primary_image'] = null;
-        }
-        $row['entry_sort']              = $esort;
-        $row['entry_user_sort']         = $usort;
-        $row['entry_category_sort']     = $csort;
-        $row['entry_user_id']           = SUID;
-        $SQL    = SQL::newInsert('entry');
+        $row['entry_posted_datetime'] = date('Y-m-d H:i:s', REQUEST_TIME);
+        $row['entry_updated_datetime'] = date('Y-m-d H:i:s', REQUEST_TIME);
+        $row['entry_hash'] = md5(SYSTEM_GENERATED_DATETIME . date('Y-m-d H:i:s', REQUEST_TIME));
+        $primaryImageUnit = $collection->getPrimaryImageUnit();
+        $row['entry_primary_image'] = $primaryImageUnit ? $primaryImageUnit->getId() : null;
+        $row['entry_sort'] = $esort;
+        $row['entry_user_sort'] = $usort;
+        $row['entry_category_sort'] = $csort;
+        $row['entry_user_id'] = SUID;
+        $row['entry_blog_id'] = $targetBid;
+        $SQL = SQL::newInsert('entry');
         foreach ($row as $fd => $val) {
             if (
                 !in_array($fd, [
@@ -448,7 +245,10 @@ class DuplicateEntry
                     'entry_rev_memo',
                     'entry_rev_user_id',
                     'entry_rev_datetime',
-                    'entry_current_rev_id'
+                    'entry_current_rev_id',
+                    'entry_reserve_rev_id',
+                    'entry_lock_datetime',
+                    'entry_lock_uid',
                 ], true)
             ) {
                 $SQL->addInsert($fd, $val);
@@ -458,11 +258,12 @@ class DuplicateEntry
         $SQL->addInsert('entry_last_update_user_id', SUID);
         $DB->query($SQL->get(dsn()), 'exec');
 
-        $SQL    = SQL::newInsert('entry_rev');
+        $SQL = SQL::newInsert('entry_rev');
         foreach ($row as $fd => $val) {
             if (
                 !in_array($fd, [
                     'entry_current_rev_id',
+                    'entry_reserve_rev_id',
                     'entry_last_update_user_id',
                     'entry_rev_id',
                     'entry_rev_user_id',
@@ -479,22 +280,27 @@ class DuplicateEntry
 
         //-----
         // tag
-        $SQL    = SQL::newSelect('tag');
+        $SQL = SQL::newSelect($sourceRev ? 'tag_rev' : 'tag');
         $SQL->addWhereOpr('tag_entry_id', $eid);
         $SQL->addWhereOpr('tag_blog_id', $bid);
-        $q  = $SQL->get(dsn());
-        if ($DB->query($q, 'fetch') && ($row = $DB->fetch($q))) {
+        if ($sourceRev) {
+            $SQL->addWhereOpr('tag_rev_id', 1);
+        }
+        $q = $SQL->get(dsn());
+        $statement = $DB->query($q, 'exec');
+        if ($statement && ($row = $DB->next($statement))) {
+            $insert = SQL::newBulkInsert('tag_rev');
             do {
-                $row['tag_entry_id']    = $newEid;
-                $Insert = SQL::newInsert('tag_rev');
-                foreach ($row as $fd => $val) {
-                    $Insert->addInsert($fd, $val);
-                }
+                $row['tag_entry_id'] = $newEid;
                 if (!$sourceRev) {
-                    $Insert->addInsert('tag_rev_id', 1);
+                    $row['tag_rev_id'] = 1;
+                    $row['tag_blog_id'] = $targetBid;
                 }
-                $DB->query($Insert->get(dsn()), 'exec');
-            } while ($row = $DB->fetch($q));
+                $insert->addInsert($row);
+            } while ($row = $DB->next($statement));
+            if ($insert->hasData()) {
+                $DB->query($insert->get(dsn()), 'exec');
+            }
         }
 
         //--------------
@@ -504,85 +310,57 @@ class DuplicateEntry
         } else {
             $subCategory = loadSubCategories($eid);
         }
-        Entry::saveSubCategory($newEid, $cid, implode(',', $subCategory['id']), $bid, 1);
+        Entry::saveSubCategory($newEid, $cid, implode(',', $subCategory['id']), $targetBid, 1);
 
         //-------
         // field
         if ($sourceRev) {
-            $Field  = loadEntryField($eid, 1);
+            $Field = loadEntryField($eid, 1);
         } else {
-            $Field  = loadEntryField($eid);
+            $Field = loadEntryField($eid);
         }
-
+        $this->duplicateFieldsTrait($Field);
         foreach ($Field->listFields() as $fd) {
-            $this->conversionId($Field, $fd, $bid);
-            if (!strpos($fd, '@path')) {
-                continue;
-            }
-            $set = false;
-            $base   = substr($fd, 0, (-1 * strlen('@path')));
-            foreach ($Field->getArray($fd, true) as $i => $path) {
-                if (!Storage::isFile($sourceDir . $path)) {
-                    continue;
-                }
-                $info       = pathinfo($path);
-                $dirname    = empty($info['dirname']) ? '' : $info['dirname'] . '/';
-                Storage::makeDirectory(REVISON_ARCHIVES_DIR . $dirname);
-                $ext        = empty($info['extension']) ? '' : '.' . $info['extension'];
-                $newPath    = $dirname . uniqueString() . $ext;
-
-                $path       = $sourceDir . $path;
-                $largePath  = otherSizeImagePath($path, 'large');
-                $tinyPath   = otherSizeImagePath($path, 'tiny');
-                $squarePath = otherSizeImagePath($path, 'square');
-
-                $newLargePath   = otherSizeImagePath($newPath, 'large');
-                $newTinyPath    = otherSizeImagePath($newPath, 'tiny');
-                $newSquarePath  = otherSizeImagePath($newPath, 'square');
-
-                Storage::copy($path, REVISON_ARCHIVES_DIR . $newPath);
-                Storage::copy($largePath, REVISON_ARCHIVES_DIR . $newLargePath);
-                Storage::copy($tinyPath, REVISON_ARCHIVES_DIR . $newTinyPath);
-                Storage::copy($squarePath, REVISON_ARCHIVES_DIR . $newSquarePath);
-
-                if (!$set) {
-                    $Field->delete($fd);
-                    $Field->delete($base . '@largePath');
-                    $Field->delete($base . '@tinyPath');
-                    $Field->delete($base . '@squarePath');
-                    $set = true;
-                }
-                $Field->add($fd, $newPath);
-                if (Storage::isReadable($largePath)) {
-                    $Field->add($base . '@largePath', $newLargePath);
-                }
-                if (Storage::isReadable($tinyPath)) {
-                    $Field->add($base . '@tinyPath', $newTinyPath);
-                }
-                if (Storage::isReadable($squarePath)) {
-                    $Field->add($base . '@squarePath', $newSquarePath);
-                }
-            }
+            $this->conversionId($Field, $fd, $targetBid);
         }
+        Common::saveField('eid', $newEid, $Field, null, null, '', $targetBid);
         Entry::saveFieldRevision($newEid, $Field, 1);
+        Common::saveFulltext('eid', $newEid, Common::loadEntryFulltext($newEid), $targetBid);
     }
 
+    /**
+     * 関連エントリーの複製
+     * @param int $eid 複製元のエントリーID
+     * @param int $newEid 複製先のエントリーID
+     * @return void
+     */
     protected function relationDupe($eid, $newEid)
     {
-        $DB = DB::singleton(dsn());
         $SQL = SQL::newSelect('relationship');
         $SQL->addWhereOpr('relation_id', $eid);
-        $all = $DB->query($SQL->get(dsn()), 'all');
+        $all = DB::query($SQL->get(dsn()), 'all');
 
+        $sql = SQL::newBulkInsert('relationship');
         foreach ($all as $row) {
-            $SQL = SQL::newInsert('relationship');
-            $SQL->addInsert('relation_id', $newEid);
-            $SQL->addInsert('relation_eid', $row['relation_eid']);
-            $SQL->addInsert('relation_order', $row['relation_order']);
-            $DB->query($SQL->get(dsn()), 'exec');
+            $sql->addInsert([
+                'relation_id' => $newEid,
+                'relation_eid' => $row['relation_eid'],
+                'relation_type' => $row['relation_type'],
+                'relation_order' => $row['relation_order'],
+            ]);
+        }
+        if ($sql->hasData()) {
+            DB::query($sql->get(dsn()), 'exec');
         }
     }
 
+    /**
+     * 位置情報の複製
+     * @param int $eid 複製元のエントリーID
+     * @param int $newEid 複製先のエントリーID
+     * @param int $targetBid 複製先のブログID
+     * @return void
+     */
     protected function geoDuplicate($eid, $newEid, $targetBid = BID)
     {
         $DB = DB::singleton(dsn());
@@ -595,88 +373,6 @@ class DuplicateEntry
             $SQL->addInsert('geo_zoom', $row['geo_zoom']);
             $SQL->addInsert('geo_blog_id', $targetBid);
             $DB->query($SQL->get(dsn()), 'exec');
-        }
-    }
-
-    protected function fieldDupe(&$Field, $targetBid = BID)
-    {
-        foreach ($Field->listFields() as $fd) {
-            $this->conversionId($Field, $fd, $targetBid);
-
-            if (preg_match('/(.*?)@path$/', $fd, $match)) {
-                $_fd    = $match[1];
-
-                // カスタムフィールドグループ対応
-                $ary_path = $Field->getArray($_fd . '@path');
-                if (is_array($ary_path) && count($ary_path) > 0) {
-                    $int_filedindex = 0;
-                    $Old_Field = new Field();
-                    $Old_Field->set($_fd . '@path', $Field->getArray($_fd . '@path'));
-                    $Old_Field->set($_fd . '@largePath', $Field->getArray($_fd . '@largePath'));
-                    $Old_Field->set($_fd . '@tinyPath', $Field->getArray($_fd . '@tinyPath'));
-                    $Old_Field->set($_fd . '@squarePath', $Field->getArray($_fd . '@squarePath'));
-
-                    foreach ($ary_path as $path) {
-                        if (
-                            Storage::isFile(ARCHIVES_DIR . $path) &&
-                            preg_match('@^(.*?)([^/]+)(\.[^.]+)$@', $path, $match)
-                        ) {
-                            $dirname    = $match[1];
-                            $basename   = $match[2];
-                            $extension  = $match[3];
-
-                            $info = [
-                                'field'         => $_fd,
-                                'dirname'       => $dirname,
-                                'newBasename'   => uniqueString(),
-                                'extension'     => $extension,
-                            ];
-
-                            foreach (
-                                [
-                                    ''          => '@path',
-                                    'large-'    => '@largePath',
-                                    'tiny-'     => '@tinyPath',
-                                    'square-'   => '@squarePath',
-                                ] as $pfx => $name
-                            ) {
-                                $info['name']   = $name;
-                                $info['pfx']    = $pfx;
-                                $this->filesDupe($Field, $Old_Field, $info, $int_filedindex);
-                            }
-                            $int_filedindex++;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    protected function filesDupe(&$Field, &$Old_Field, $info, $int_filedindex)
-    {
-        $key = $info['name'];
-        $pfx = $info['pfx'];
-        $_fd = $info['field'];
-        $dirname = $info['dirname'];
-        $newBasename = $info['newBasename'];
-        $extension = $info['extension'];
-
-        if (
-            $path = $Old_Field->get($_fd . $key, null, $int_filedindex) &&
-            Storage::isFile(ARCHIVES_DIR . $path)
-        ) {
-            $newPath   = $dirname . $pfx . $newBasename . $extension;
-
-            Storage::copy(ARCHIVES_DIR . $path, ARCHIVES_DIR . $newPath);
-            if (HOOK_ENABLE) {
-                $Hook = ACMS_Hook::singleton();
-                $Hook->call('mediaCreate', ARCHIVES_DIR . $newPath);
-            }
-            if ($int_filedindex == 0) {
-                $Field->setField($_fd . $key, $newPath);
-            } else {
-                $Field->addField($_fd . $key, $newPath);
-            }
         }
     }
 
@@ -764,7 +460,7 @@ class DuplicateEntry
      */
     protected function conversionCategoryId(&$Field, $fd, $targetBid)
     {
-        $engine = App::make('google_translate.engine');
+        $engine = Application::make('google_translate.engine');
         $translationCidFields = $this->config->getArray('translationCidFieldName');
         if (in_array($fd, $translationCidFields, true)) {
             $cidValue = $Field->getArray($fd);

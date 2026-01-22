@@ -2,13 +2,13 @@
 
 namespace Acms\Plugins\GoogleTranslate;
 
-use App;
 use ACMS_App;
-use Google\Cloud\Translate\V2\TranslateClient;
+use Acms\Services\Facades\Application;
 use Acms\Services\Facades\Storage;
 use Acms\Services\Facades\Config;
 use Acms\Services\Common\HookFactory;
 use Acms\Services\Common\InjectTemplate;
+use Google\Cloud\Translate\V3\Client\TranslationServiceClient;
 
 class ServiceProvider extends ACMS_App
 {
@@ -60,18 +60,21 @@ class ServiceProvider extends ACMS_App
         if ($code = $baseBlogConfig->get('google_translate_base_lang')) {
             $engine->setBaseLangCode($code);
         }
-        App::singleton('google_translate.engine', function () use ($engine) {
+        Application::singleton('google_translate.engine', function () use ($engine) {
             return $engine;
         });
-        App::singleton('google_translate.duplicate', '\Acms\Plugins\GoogleTranslate\DuplicateEntry');
-        App::singleton('google_translate.import', function () {
+        Application::singleton('google_translate.duplicate', '\Acms\Plugins\GoogleTranslate\DuplicateEntry');
+        Application::singleton('google_translate.import', function () {
             return new Import(dirname(__FILE__) . '/schema/schema.json');
         });
-        App::bind('google_translate.google.translate', function () use ($baseBlogConfig) {
-            $client = new TranslateClient([
-                'key' => $baseBlogConfig->get('google_translate_google_translate_api_key'),
+        Application::bind('google_translate.google.translate', function () use ($baseBlogConfig) {
+            $projectId = $baseBlogConfig->get('google_translate_project_id');
+            $jsonPath = $baseBlogConfig->get('google_translate_service_account_json_path');
+            $client = new TranslationServiceClient([
+                'credentials' => $jsonPath
             ]);
-            return new GoogleTranslate($client);
+            $parent = $client->locationName($projectId, 'global');
+            return new GoogleTranslate($client, $parent);
         });
 
         $hook = HookFactory::singleton();
@@ -85,13 +88,6 @@ class ServiceProvider extends ACMS_App
             $inject->add('admin-main', PLUGIN_DIR . 'GoogleTranslate/template/admin/main.html');
             $inject->add('admin-topicpath', PLUGIN_DIR . 'GoogleTranslate/template/admin/topicpath.html');
         }
-        /**
-         * ToDo: Spoke連携
-         * https://www.alleyoop.co.jp/spoke/
-         */
-//        if (preg_match('/^\/api\/spoke/', REQUEST_PATH)) {
-//            require_once dirname(__FILE__) . '/bootstrap.php';
-//        }
     }
 
     /**

@@ -4,16 +4,16 @@ namespace Acms\Plugins\GoogleTranslate\Models;
 
 use Acms\Plugins\GoogleTranslate\Contracts\Model;
 use Acms\Services\Facades\Application;
-use DB;
+use Acms\Services\Facades\Entry as EntryHelper;
+use Acms\Services\Facades\Common;
+use Acms\Services\Facades\Database as DB;
 use SQL;
 use Field;
-use Common;
-use Acms\Services\Entry\Helper as EntryHelper;
 
 class Entry extends Model
 {
-    private const SORT_ENTRY    = 1;
-    private const SORT_USER     = 2;
+    private const SORT_ENTRY = 1;
+    private const SORT_USER = 2;
     private const SORT_CATEGORY = 3;
 
     /**
@@ -36,6 +36,7 @@ class Entry extends Model
         $this->approval = 'none';
         $this->form_status = '';
         $this->title = '';
+        $this->link = '';
         $this->datetime = $now;
         $this->start_datetime = '1000-01-01 00:00:00';
         $this->end_datetime = '9999-12-31 23:59:59';
@@ -43,16 +44,22 @@ class Entry extends Model
         $this->updated_datetime = $now;
         $this->summary_range = null;
         $this->indexing = 'on';
+        $this->members_only = 'off';
         $this->primary_image = null;
         $this->current_rev_id = 0;
+        $this->reserve_rev_id = 0;
         $this->last_update_user_id = 1;
         $this->hash = md5(SYSTEM_GENERATED_DATETIME . $now);
         $this->category_id = null;
         $this->user_id = 1;
         $this->form_id = 0;
         $this->blog_id = 1;
+        $this->delete_uid = null;
+        $this->lock_datetime = '1000-01-01 00:00:00';
+        $this->lock_uid = 0;
+
         $this->fields = new Field();
-        $this->units = [];
+        $this->units = null;
 
         if (empty($entry)) {
             $this->init();
@@ -137,9 +144,9 @@ class Entry extends Model
         $this->fields = loadEntryField($this->id);
 
         // ablogcms v3.1.23 からリファクタリングによりメソッドがなくなっている問題の解決
-        if (method_exists(EntryHelper::class, 'saveColumn')) {
+        if (method_exists(\Acms\Services\Entry\Helper::class, 'saveColumn')) {
             $this->units = loadColumn($this->id);
-            foreach ($this->units as & $unit) {
+            foreach ($this->units as &$unit) {
                 $type = detectUnitTypeSpecifier($unit['type']);
                 if ($type === 'custom') {
                     $unit['field'] = acmsUnserialize($unit['field']);
@@ -151,8 +158,7 @@ class Entry extends Model
             $unitService = Application::make('unit-repository');
             $this->units = $unitService->loadUnits($this->id);
 
-            foreach ($this->units as & $unit) {
-                $type = detectUnitTypeSpecifier($unit->getType());
+            foreach ($this->units as &$unit) {
                 $unit->setTempId(uniqueString());
             }
         }
@@ -184,13 +190,12 @@ class Entry extends Model
         }
 
         // ablogcms v3.1.23 からリファクタリングによりメソッドがなくなっている問題の解決
-        if (method_exists(EntryHelper::class, 'saveColumn')) {
-            $entryHelper = new EntryHelper();
-            $entryHelper->saveColumn($this->units, $this->id, $this->blog_id);
+        if (method_exists(\Acms\Services\Entry\Helper::class, 'saveColumn')) {
+            EntryHelper::saveColumn($this->units, $this->id, $this->blog_id);
         } else {
             $unitRepository = Application::make('unit-repository');
             assert($unitRepository instanceof \Acms\Services\Unit\Repository);
-            $unitRepository->saveUnits($this->units, $this->id, $this->blog_id);
+            $unitRepository->saveAllUnits($this->units, $this->id, $this->blog_id);
         }
 
         Common::saveField('eid', $this->id, $this->fields);
@@ -202,8 +207,8 @@ class Entry extends Model
      */
     public function delete()
     {
-        Entry::entryDelete($this->id);
-        Entry::revisionDelete($this->id);
+        EntryHelper::entryDelete($this->id);
+        EntryHelper::revisionDelete($this->id);
     }
 
     /**
@@ -212,34 +217,16 @@ class Entry extends Model
      */
     protected function getNextSort($type)
     {
-        $DB = DB::singleton(dsn());
-        $SQL = SQL::newSelect('entry');
+        $entryRepository = Application::make('entry.repository');
+        assert($entryRepository instanceof \Acms\Services\Entry\EntryRepository);
 
-        switch ($type) {
-            case self::SORT_ENTRY:
-                $SQL->setSelect('entry_sort');
-                $SQL->addWhereOpr('entry_blog_id', $this->blog_id);
-                $SQL->setOrder('entry_sort', 'DESC');
-                break;
-            case self::SORT_USER:
-                $SQL->setSelect('entry_user_sort');
-                $SQL->addWhereOpr('entry_user_id', $this->user_id);
-                $SQL->addWhereOpr('entry_blog_id', $this->blog_id);
-                $SQL->setOrder('entry_user_sort', 'DESC');
-                break;
-            case self::SORT_CATEGORY:
-                $SQL->setSelect('entry_category_sort');
-                $SQL->addWhereOpr('entry_category_id', $this->category_id);
-                $SQL->addWhereOpr('entry_blog_id', $this->blog_id);
-                $SQL->setOrder('entry_category_sort', 'DESC');
-                break;
-            default:
-                return 0;
+        if ($type === self::SORT_ENTRY) {
+            return $entryRepository->nextSort($this->blog_id);
+        } elseif ($type === self::SORT_USER) {
+            return $entryRepository->nextUserSort($this->user_id, $this->blog_id);
+        } elseif ($type === self::SORT_CATEGORY) {
+            return $entryRepository->nextCategorySort($this->category_id, $this->blog_id);
         }
-
-        $SQL->setLimit(1);
-        $next = intval($DB->query($SQL->get(dsn()), 'one')) + 1;
-
-        return $next;
+        return 0;
     }
 }

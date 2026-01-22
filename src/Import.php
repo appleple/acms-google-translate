@@ -52,9 +52,10 @@ class Import
     /**
      * @param int $eid
      * @param string $json
+     * @param \Acms\Services\Unit\UnitCollection $units
      * @throws \Acms\Plugins\GoogleTranslate\Exceptions\NotFoundException
      */
-    public function import($eid, $json)
+    public function import($eid, $json, $units)
     {
         $entry = $this->decode($json);
         if ($entry->langCode === 'ja') {
@@ -67,7 +68,7 @@ class Import
         if (empty($model)) {
             throw new NotFoundException('Target not found.');
         }
-        $this->buildEntry($model, $entry);
+        $this->buildEntry($model, $entry, $units);
         $model->save();
         $this->updateStatus($eid);
     }
@@ -83,8 +84,9 @@ class Import
     /**
      * @param \Acms\Plugins\GoogleTranslate\Contracts\Model $model
      * @param object $entry
+     * @param \Acms\Services\Unit\UnitCollection $units
      */
-    protected function buildEntry(&$model, $entry)
+    protected function buildEntry(&$model, $entry, $units)
     {
         // entry
         foreach ($model->columns as $column) {
@@ -93,60 +95,8 @@ class Import
             }
         }
 
-        // unit
-        if (property_exists($entry, 'units') && is_array($entry->units)) {
-            foreach ($entry->units as $new) {
-                $clid = $new->clid;
-                foreach ($model->units as $i => $current) {
-                    if (is_array($current) && $current['clid'] === $clid) {
-                        $type = detectUnitTypeSpecifier($new->type);
-                        switch ($type) {
-                            case 'text':
-                                $current['text'] = $new->text;
-                                break;
-                            case 'table':
-                                $current['table'] = $new->table;
-                                break;
-                            case 'media':
-                            case 'image':
-                                $current['caption'] = $new->caption;
-                                $current['alt'] = $new->alt;
-                                break;
-                            case 'file':
-                                $current['caption'] = $new->caption;
-                                break;
-                        }
-                        $current['id'] = uniqueString();
-                        $model->units[$i] = $current;
-                        break;
-                    } elseif (is_object($current) && $current->getId() === $clid) {
-                        $type = detectUnitTypeSpecifier($new->type);
-                        switch ($type) {
-                            case 'text':
-                                $current->setField1($new->text);
-                                break;
-                            case 'table':
-                                $current->setField1($new->table);
-                                break;
-                            case 'media':
-                                $current->setField2($new->caption);
-                                $current->setField3($new->alt);
-                                break;
-                            case 'image':
-                                $current->setField1($new->caption);
-                                $current->setField4($new->alt);
-                                break;
-                            case 'file':
-                                $current->setField1($new->caption);
-                                break;
-                        }
-                        $current->setTempId(uniqueString());
-                        $model->units[$i] = $current;
-                        break;
-                    }
-                }
-            }
-        }
+        // units
+        $model->units = $units;
 
         // field
         if (property_exists($entry, 'fields') && is_array($entry->fields)) {
