@@ -2,13 +2,15 @@
 
 namespace Acms\Plugins\GoogleTranslate;
 
-use DB;
+use Acms\Services\Facades\Database as DB;
+use Acms\Services\Facades\Common;
+use Acms\Services\Facades\Config;
+use Acms\Services\Facades\Application;
+use Acms\Services\Unit\Contracts\Model;
 use SQL;
 use ACMS_RAM;
 use ACMS_Filter;
 use Field;
-use Common;
-use Config;
 
 class Engine
 {
@@ -345,20 +347,12 @@ class Engine
      * エントリーユニットのレスポンスデータ組み立て
      *
      * @param int $eid
-     * @return array
+     * @return \Acms\Services\Unit\UnitCollection[]
      */
     protected function buildUnitData($eid)
     {
-        $item = [];
-        $units = loadColumn($eid);
-        foreach ($units as $unit) {
-            $type = detectUnitTypeSpecifier($unit['type']);
-            if (!in_array($type, ['text', 'table', 'media', 'image', 'file'], true)) {
-                continue;
-            }
-            $item[] = $unit;
-        }
-        return $item;
+        $unitService = Application::make('unit-repository');
+        return $unitService->loadUnits($eid);
     }
 
     protected function changeParentCategory($cid, $toPid, $targetBid)
@@ -438,7 +432,6 @@ class Engine
             $toLeft     = intval($row['category_right']);
             $toRight    = $toLeft   + 1;
             $toSort     = intval($row['category_sort']) + 1;
-            ;
         }
 
         //-----

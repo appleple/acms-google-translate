@@ -2,12 +2,20 @@
 
 namespace Acms\Plugins\GoogleTranslate;
 
+use Google\Cloud\Translate\V3\Client\TranslationServiceClient;
+use Google\Cloud\Translate\V3\TranslateTextRequest;
+
 class GoogleTranslate
 {
     /**
-     * @var \Google\Cloud\Translate\TranslateClient
+     * @var TranslationServiceClient
      */
     protected $client;
+
+    /**
+     * @var string
+     */
+    protected $parent;
 
     /**
      * @var string
@@ -46,11 +54,13 @@ class GoogleTranslate
 
     /**
      * GoogleTranslate constructor.
-     * @param \Google\Cloud\Translate\TranslateClient $client
+     * @param TranslationServiceClient $client
+     * @param string $parent
      */
-    public function __construct($client)
+    public function __construct($client, $parent)
     {
         $this->client = $client;
+        $this->parent = $parent;
     }
 
     /**
@@ -67,8 +77,10 @@ class GoogleTranslate
      */
     public function addText($key, $txt)
     {
-        $this->textKeys[] = $key;
-        $this->textTranslations[] = $txt;
+        if ($txt) {
+            $this->textKeys[] = $key;
+            $this->textTranslations[] = $txt;
+        }
     }
 
     /**
@@ -77,8 +89,10 @@ class GoogleTranslate
      */
     public function addHtml($key, $txt)
     {
-        $this->htmlKeys[] = $key;
-        $this->htmlTranslations[] = $txt;
+        if ($txt) {
+            $this->htmlKeys[] = $key;
+            $this->htmlTranslations[] = $txt;
+        }
     }
 
     /**
@@ -119,16 +133,34 @@ class GoogleTranslate
     public function translate()
     {
         if (count($this->textTranslations) > 0) {
-            $this->textTranslated = $this->client->translateBatch($this->textTranslations, [
-                'target' => $this->targetLanguage,
-                'format' => 'text',
-            ]);
+            $request = new TranslateTextRequest();
+            $request->setParent($this->parent);
+            $request->setContents($this->textTranslations);
+            $request->setMimeType('text/plain');
+            $request->setTargetLanguageCode($this->targetLanguage);
+
+            $response = $this->client->translateText($request);
+            $translations = $response->getTranslations();
+
+            $this->textTranslated = [];
+            foreach ($translations as $translation) {
+                $this->textTranslated[] = ['text' => $translation->getTranslatedText()];
+            }
         }
         if (count($this->htmlTranslations) > 0) {
-            $this->htmlTranslated = $this->client->translateBatch($this->htmlTranslations, [
-                'target' => $this->targetLanguage,
-                'format' => 'html',
-            ]);
+            $request = new TranslateTextRequest();
+            $request->setParent($this->parent);
+            $request->setContents($this->htmlTranslations);
+            $request->setMimeType('text/html');
+            $request->setTargetLanguageCode($this->targetLanguage);
+
+            $response = $this->client->translateText($request);
+            $translations = $response->getTranslations();
+
+            $this->htmlTranslated = [];
+            foreach ($translations as $translation) {
+                $this->htmlTranslated[] = ['text' => $translation->getTranslatedText()];
+            }
         }
     }
 }

@@ -2,14 +2,13 @@
   "name": "com.appleple/google-translate",
   "description": "Google Translate API を使ってエントリーを多言語化する拡張アプリです。",
   "require": {
-    "php": ">=7.2.5",
-    "slim/slim": "^3.12.3",
-    "google/cloud": "^0.201.0"
+    "php": ">=8.1",
+    "google/cloud-translate": "^2.1"
   },
   "config": {
     "vendor-dir": "vendor",
     "platform": {
-      "php": "7.2.5"
+      "php": "8.1"
     }
   }
 }

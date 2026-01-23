@@ -1,7 +1,7 @@
 <!-- BEGIN_MODULE Admin_Errors -->
 <p class="acms-admin-alert acms-admin-alert-danger acms-admin-alert-icon">
   <span class="acms-admin-alert-icon-before acms-admin-icon-news"></span>
-  \{error\}
+  {error}
   <button class="js-acms-alert-close acms-admin-alert-icon-after acms-admin-margin-right-mini">×</button>
 </p>
 <!-- END_MODULE Admin_Errors -->
@@ -20,35 +20,35 @@
         <th width="100">編集</th>
       </tr>
       </thead>
-      <tbody><!-- BEGIN\ lang:loop -->
+      <tbody><!-- BEGIN lang:loop -->
       <tr>
         <th class="acms-admin-text-nowrap">
-          \{label\}
-          <!-- BEGIN_IF [\{relation_eid\}/eq/%{EID}] -->
+          {label}
+          <!-- BEGIN_IF [{relation_eid}/eq/%{EID}] -->
           <span class="acms-admin-label acms-admin-label-success admin-status-label">表示中</span>
           <!-- END_IF -->
         </th>
         <td>
-          <!-- BEGIN_IF [\{entry_status\}/eq/close]--><span class="acms-admin-label acms-admin-label-danger admin-status-label"><!--T-->非公開<!--/T--></span>
-          <!-- ELSE_IF [\{entry_status\}/eq/open] --><span class="acms-admin-label acms-admin-label-info admin-status-label"><!--T-->公開<!--/T--></span>
-          <!-- ELSE_IF [\{entry_status\}/eq/draft] --><span class="acms-admin-label acms-admin-label-warning admin-status-label"><!--T-->下書き<!--/T--></span>
-          <!-- ELSE_IF [\{entry_status\}/eq/trash] --><span class="acms-admin-label acms-admin-label-danger admin-status-label"><!--T-->ゴミ箱<!--/T--></span>
+          <!-- BEGIN_IF [{entry_status}/eq/close]--><span class="acms-admin-label acms-admin-label-danger admin-status-label"><!--T-->非公開<!--/T--></span>
+          <!-- ELSE_IF [{entry_status}/eq/open] --><span class="acms-admin-label acms-admin-label-info admin-status-label"><!--T-->公開<!--/T--></span>
+          <!-- ELSE_IF [{entry_status}/eq/draft] --><span class="acms-admin-label acms-admin-label-warning admin-status-label"><!--T-->下書き<!--/T--></span>
+          <!-- ELSE_IF [{entry_status}/eq/trash] --><span class="acms-admin-label acms-admin-label-danger admin-status-label"><!--T-->ゴミ箱<!--/T--></span>
           <!-- ELSE --><span class="acms-admin-label acms-admin-label admin-status-label"><!--T-->未作成<!--/T--></span><!-- END_IF -->
 
-          <span class="acms-admin-label acms-admin-label-\{status_code\}">\{status\}</span>
+          <span class="acms-admin-label acms-admin-label-{status_code}">{status}</span>
         </td>
         <td>
-          <a href="\{category_editUrl\}" target="_blank">\{category_label\}</a>
+          <a href="{category_editUrl}" target="_blank">{category_label}</a>
         </td>
-        <!-- BEGIN_IF [\{title\}/nem] -->
-        <td><a href="\{url\}" target="_blank">\{title\} - \{code\}</a></td>
+        <!-- BEGIN_IF [{title}/nem] -->
+        <td><a href="{url}" target="_blank">{title} - {code}</a></td>
         <td>
-          <a href="\{edit_url\}" class="acms-admin-btn">編集</a>
-          <!-- BEGIN_IF [\{base_bid\}/eq/%{BID}] -->
-          <!-- BEGIN_IF [\{base_bid\}/neq/\{relation_bid\}] -->
+          <a href="{edit_url}" class="acms-admin-btn">編集</a>
+          <!-- BEGIN_IF [{base_bid}/eq/%{BID}] -->
+          <!-- BEGIN_IF [{base_bid}/neq/{relation_bid}] -->
           <form action="" method="post" class="acms-admin-form acms-admin-inline">
             <input type="submit" name="ACMS_POST_Entry_Delete" class="acms-admin-btn acms-admin-btn-danger" value="削除" onclick="javascript:return confirm('エントリーを削除します。よろしいですか？')" />
-            <input type="hidden" name="eid" value="\{relation_eid\}" />
+            <input type="hidden" name="eid" value="{relation_eid}" />
             <input type="hidden" name="redirect" value="%{CURRENT_URL}" />
           </form>
           <!-- END_IF -->
@@ -56,14 +56,14 @@
         </td>
         <!-- ELSE -->
         <td>
-          <!-- BEGIN_IF [\{base_bid\}/eq/%{BID}] -->
+          <!-- BEGIN_IF [{base_bid}/eq/%{BID}] -->
           <form method="post" class="acms-admin-inline">
-            <input type="hidden" name="target_bid" value="\{relation_bid\}">
+            <input type="hidden" name="target_bid" value="{relation_bid}">
             <input type="hidden" name="original_eid" value="%{EID}">
             <input type="submit" name="ACMS_POST_GoogleTranslate_CreateEntry" value="コピーのみ作成" class="acms-admin-btn acms-admin-btn-success">
           </form>
           <form method="post" class="acms-admin-inline">
-            <input type="hidden" name="target_bid" value="\{relation_bid\}">
+            <input type="hidden" name="target_bid" value="{relation_bid}">
             <input type="hidden" name="original_eid" value="%{EID}">
             <input type="hidden" name="do_google_translate" value="1">
             <input type="submit" name="ACMS_POST_GoogleTranslate_CreateEntry" value="翻訳して作成" class="acms-admin-btn acms-admin-btn-success">
@@ -74,7 +74,7 @@
         </td>
         <td></td>
         <!-- END_IF -->
-      </tr><!-- END\ lang:loop -->
+      </tr><!-- END lang:loop -->
       </tbody>
     </table>
   </div>

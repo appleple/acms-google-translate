@@ -2,19 +2,24 @@
     "name": "com.appleple/google-translate",
     "description": "a-blog cms extension.",
     "scripts": {
-      "lint": "vendor/bin/phpcs --standard=phpcs.xml",
-      "format": "vendor/bin/phpcbf --standard=phpcs.xml",
-      "post-install-cmd": "\"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility",
-      "post-update-cmd" : "\"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility"
+        "lint": "vendor/bin/phpcs --standard=phpcs.xml",
+        "format": "vendor/bin/phpcbf --standard=phpcs.xml",
+        "check:version": "vendor/bin/phpcs --standard=PHPCompatibility --runtime-set testVersion 8.1-8.4 --ignore=./src/vendor/* ./src",
+        "post-install-cmd": "\"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility",
+        "post-update-cmd": "\"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility"
     },
     "require-dev": {
-        "squizlabs/php_codesniffer": "3.*",
-        "phpcompatibility/php-compatibility": "*"
+        "squizlabs/php_codesniffer": "^3.13",
+        "phpcompatibility/php-compatibility": "^9.3",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.1"
     },
     "prefer-stable" : true,
     "config": {
         "platform": {
             "php": "8.3"
+        },
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
         }
     }
 }
