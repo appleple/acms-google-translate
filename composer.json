@@ -1,5 +1,5 @@
 {
-    "name": "com.appleple/google-translate",
+    "name": "appleple/google-translate",
     "description": "a-blog cms extension.",
     "autoload": {
         "psr-4": {
