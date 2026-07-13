@@ -7,7 +7,7 @@
 
     <!-- Run against the PHPCompatibility ruleset -->
     <rule ref="PHPCompatibility"/>
-    <config name="testVersion" value="7.2-"/>
+    <config name="testVersion" value="8.1-8.5"/>
 
     <!-- 配列の古い構文を使用禁止にする -->
     <rule ref="Generic.Arrays.DisallowLongArraySyntax"/>
