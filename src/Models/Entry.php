@@ -143,25 +143,9 @@ class Entry extends Model
 
         $this->fields = loadEntryField($this->id);
 
-        // ablogcms v3.1.23 からリファクタリングによりメソッドがなくなっている問題の解決
-        if (method_exists(\Acms\Services\Entry\Helper::class, 'saveColumn')) {
-            $this->units = loadColumn($this->id);
-            foreach ($this->units as &$unit) {
-                $type = detectUnitTypeSpecifier($unit['type']);
-                if ($type === 'custom') {
-                    $unit['field'] = acmsUnserialize($unit['field']);
-                }
-                $unit['id'] = uniqueString();
-            }
-        } else {
-            /** @var \Acms\Services\Unit\Repository $unitService */
-            $unitService = Application::make('unit-repository');
-            $this->units = $unitService->loadUnits($this->id);
-
-            foreach ($this->units as &$unit) {
-                $unit->setTempId(uniqueString());
-            }
-        }
+        /** @var \Acms\Services\Unit\Repository $unitService */
+        $unitService = Application::make('unit-repository');
+        $this->units = $unitService->loadUnits($this->id);
     }
 
     /**
@@ -189,14 +173,9 @@ class Entry extends Model
             $DB->query($SQL->get(dsn()), 'exec');
         }
 
-        // ablogcms v3.1.23 からリファクタリングによりメソッドがなくなっている問題の解決
-        if (method_exists(\Acms\Services\Entry\Helper::class, 'saveColumn')) {
-            EntryHelper::saveColumn($this->units, $this->id, $this->blog_id);
-        } else {
-            $unitRepository = Application::make('unit-repository');
-            assert($unitRepository instanceof \Acms\Services\Unit\Repository);
-            $unitRepository->saveAllUnits($this->units, $this->id, $this->blog_id);
-        }
+        $unitRepository = Application::make('unit-repository');
+        assert($unitRepository instanceof \Acms\Services\Unit\Repository);
+        $unitRepository->saveAllUnits($this->units, $this->id, $this->blog_id);
 
         Common::saveField('eid', $this->id, $this->fields);
         Common::saveFulltext('eid', $this->id, Common::loadEntryFulltext($this->id));
